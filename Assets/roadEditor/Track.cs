@@ -14,6 +14,8 @@ public class Track : MonoBehaviour {
 	[SerializeField]
 	private float pointsPerUnityUnit = 1;
 	[SerializeField]
+	private int widthDetail = 1;
+	[SerializeField]
 	private Transform[] pointsNew;
 	[SerializeField]
 	private string name = "road";
@@ -187,6 +189,7 @@ public class Track : MonoBehaviour {
 		CreatePoints ();
 
 		roadLength = pointsCurrent.Length - 1;
+		float roadPartLength = roadLength*widthDetail;
 
 		if (pointHolder == null) {
 			bool pointFound = false;
@@ -224,24 +227,35 @@ public class Track : MonoBehaviour {
 		trackVertices = new List<Vector3>();
 
 		
+		float[] trackX = new float[widthDetail*2];
+		float widthPartSize = 1.0f/(float)widthDetail;
+		float currentXPart = -0.5f;
+		for(j = 0;j < trackX.Length;j+=2){
+			trackX[j] = currentXPart;
+			currentXPart+=widthPartSize;
+			trackX[j+1] = currentXPart;
+		}
 
 		for(i = 0;i < roadLength;i++){
 
 			Vector3 pointPos = pointsCurrent[i]- transform.position;
 			Vector3 pointPosNex = pointsCurrent[i+1]- transform.position;
-
-			Vector3 newVert1 = pointPos+(rotationsCurrent[i]*new Vector3(-0.5f*roadSize,0,0));
-			trackVertices.Add(newVert1);
-
-			Vector3 newVert2 = pointPos+(rotationsCurrent[i]*new Vector3(0.5f*roadSize,0,0));
-			trackVertices.Add(newVert2);
-
-			Vector3 newVert3 = pointPosNex+(rotationsCurrent[i+1]*new Vector3(-0.5f*roadSize,0,0));
-			trackVertices.Add(newVert3);
-
-			Vector3 newVert4 = pointPosNex+(rotationsCurrent[i+1]*new Vector3(0.5f*roadSize,0,0));
-			trackVertices.Add(newVert4);
-
+			
+			Vector3 newVert;
+			
+			for(j = 0;j < trackX.Length;j+=2){
+				newVert = pointPos+(rotationsCurrent[i]*new Vector3(trackX[j]*roadSize,0,0));
+				trackVertices.Add(newVert);
+	
+				newVert = pointPos+(rotationsCurrent[i]*new Vector3(trackX[j+1]*roadSize,0,0));
+				trackVertices.Add(newVert);
+	
+				newVert = pointPosNex+(rotationsCurrent[i+1]*new Vector3(trackX[j]*roadSize,0,0));
+				trackVertices.Add(newVert);
+	
+				newVert = pointPosNex+(rotationsCurrent[i+1]*new Vector3(trackX[j+1]*roadSize,0,0));
+				trackVertices.Add(newVert);
+			}
 		}
 		
 		trackMesh.vertices = trackVertices.ToArray();
@@ -249,7 +263,7 @@ public class Track : MonoBehaviour {
 		//uv
 		trackUvs = new List<Vector2>();
 		
-		for(i = 0;i < roadLength;i++){
+		for(i = 0;i < roadPartLength;i++){
 			trackUvs.Add(new Vector2( 0.0f,0.0f));
 			trackUvs.Add(new Vector2( 1.0f,0.0f));
 			trackUvs.Add(new Vector2( 0.0f,1.0f));
@@ -261,7 +275,7 @@ public class Track : MonoBehaviour {
 		//triangles
 		trackTriangles = new List<int>();
 		
-		for(i = 0;i < roadLength;i++){
+		for(i = 0;i < roadPartLength;i++){
 			trackTriangles.Add((1+(4*i)));
 			trackTriangles.Add((0+(4*i)));
 			trackTriangles.Add((3+(4*i)));
