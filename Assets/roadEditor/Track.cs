@@ -6,6 +6,8 @@ using System.Collections.Generic;
 public class Track : MonoBehaviour {
 	
 	[SerializeField]
+	private string name = "road";
+	[SerializeField]
 	private int roadLength = 1;
 	[SerializeField]
 	private int roadSize = 30;
@@ -17,8 +19,6 @@ public class Track : MonoBehaviour {
 	private int widthDetail = 1;
 	[SerializeField]
 	private Transform[] pointsNew;
-	[SerializeField]
-	private string name = "road";
 
 	[HideInInspector]
 	[SerializeField]
@@ -52,7 +52,13 @@ public class Track : MonoBehaviour {
 	private int k;
 	private int l;
 	private float t;
-
+	
+	public string getName{
+		get{
+			return name;
+		}
+	}
+	
 	void Start () {
 		Draw ();
 	}
