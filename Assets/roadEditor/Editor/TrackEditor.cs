@@ -16,6 +16,9 @@ public class TrackEditor : Editor
 		if(GUILayout.Button("Export OBJ")) {
 			ObjExporter.MeshToFile( myTarget.gameObject.GetComponent<MeshFilter>(),filePath,(myTarget.getName+".obj"));
 		}
+		if(GUILayout.Button("Export OBJ V2")) {
+			ObjExporterV2.MeshToFile( myTarget.gameObject.GetComponent<MeshFilter>(),filePath,(myTarget.getName+".obj"));
+		}
 		EditorApplication.update += (EditorApplication.CallbackFunction)EditortUpdate;
 
 		DrawDefaultInspector ();

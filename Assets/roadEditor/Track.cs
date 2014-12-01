@@ -19,6 +19,9 @@ public class Track : MonoBehaviour {
 	private int widthDetail = 1;
 	[SerializeField]
 	private Transform[] pointsNew;
+	[HideInInspector]
+	[SerializeField]
+	private List<Transform> pointsList;
 
 	[HideInInspector]
 	[SerializeField]
@@ -41,9 +44,12 @@ public class Track : MonoBehaviour {
 	private float[] currentWidthsSource;
 
 	private Mesh trackMesh;
+	[HideInInspector]
 	[SerializeField]
 	private GameObject pointHolder;
 
+	private bool needMorePoints;
+	private bool needSetPointsSize;
 	private List<Vector3> trackVertices;
 	private List<Vector2> trackUvs;
 	private List<int> trackTriangles;
@@ -60,23 +66,95 @@ public class Track : MonoBehaviour {
 	}
 	
 	void Start () {
-		Draw ();
+		needMorePoints = false;
+		needSetPointsSize = false;
+		UpdateTrackIfNeeded ();
 	}
 
-	int oneIn50 = 0;
+	int timer = 0;
 	public void EditortUpdate(){
-		oneIn50++;
-		if (oneIn50 % 50 == 0) {
-			UpdateTrackIfNeeded ();
+		timer++;
+		if (timer % 1000 == 0) {
+			Loop();
 		}
 	}
 
 	void FixedUpdate(){
-		UpdateTrackIfNeeded ();
+		Loop ();
+	}
+
+	void Loop(){
+		bool updateTrack = false;
+		if (needMorePoints) {
+			//Debug.Log("need more then 1 point!!");
+			if(pointsNew.Length>1){
+				needMorePoints = false;
+				updateTrack = true;
+			}
+		} else {
+			updateTrack = true;
+		}
+
+		if (pointsNew == null) {
+			if(!needSetPointsSize){
+				Debug.Log("Set Points New Size");
+				needSetPointsSize = true;
+			}
+			updateTrack = false;
+		}else{
+			needSetPointsSize = false;
+			if(updateTrack){
+				UpdateTrackIfNeeded ();
+			}
+		}
+	}
+
+	void AddPoint(int number){
+		pointsNew [number] = new GameObject("new point").transform;
+		pointsNew [number].transform.position = pointHolder.transform.position;
+		pointsNew [number].gameObject.AddComponent<TrackPoint>();
+		IconManager.SetIcon (pointsNew [number].gameObject, IconManager.LabelIcon.Orange);
+		if (pointsList == null) {
+			pointsList = new List<Transform>();
+		}
+		pointsList.Add (pointsNew [number]);
 	}
 
 	void UpdateTrackIfNeeded (){
 		bool redo =  false;
+
+		if (pointHolder == null) {
+			bool pointFound = false;
+			for(i = 0;i<gameObject.transform.childCount;i++){
+				if(gameObject.transform.GetChild(i).name == "pointHolder"){
+					pointHolder = gameObject.transform.GetChild(i).gameObject;
+					pointFound = true;
+				}
+			}
+			if(!pointFound){
+				pointHolder = new GameObject("pointHolder");
+				pointHolder.transform.parent = gameObject.transform;
+			}
+		}
+
+		//if
+		for (i = 0; i<pointsNew.Length; i++) {
+			if(pointsNew [i]==null){
+				AddPoint(i);
+			}
+			for (j = 0; j<pointsNew.Length; j++) {
+				if(i==j){
+
+				}else{
+					if(pointsNew[i]==pointsNew[j]){
+						AddPoint(i);
+					}
+				}
+
+			}
+			pointsNew [i].transform.parent = pointHolder.transform;
+		}
+
 		if (pointsNew.Length != currentPositionsSource.Length) {
 			redo = true;
 		} else if(!redo){
@@ -114,17 +192,39 @@ public class Track : MonoBehaviour {
 		}
 		
 		if (redo) {
+			//delete old points
+			int pointCount = pointsList.Count;
+			for (i = pointCount - 1; i > 0; i--) {
+				bool pointinUse = false;
+				for (j = 0; j<pointsNew.Length; j++) {
+					if(pointsList[i]==pointsNew[j]){
+						pointinUse = true;
+						break;
+					}
+				}
+				if(!pointinUse){
+					if(pointsList[i]!=null){
+					if(pointsList[i].gameObject!=null){
+						if(Application.isEditor){
+							GameObject.DestroyImmediate(pointsList[i].gameObject);
+						}else{
+							GameObject.Destroy(pointsList[i]);
+						}
+					}
+					}
+					pointsList.Remove(pointsList[i]);
+				}
+			}
 			Debug.Log("redo");
 			Draw ();
 		}
 	}
 
-	void CreatePoints (){
-		if (pointsNew.Length < 1) {
-			Debug.LogError("need more then 1 point!!");
-		}
+	bool CreatePoints (){
 		if (pointsNew.Length < 2) {
-			Debug.LogError("need more then 2 points!!");// temoprery solution
+			Debug.LogError("need more then 1 point!!");
+			needMorePoints = true;
+			return false;
 		}
 
 		List<Vector3> tempListPos = new List<Vector3> (); 
@@ -226,28 +326,13 @@ public class Track : MonoBehaviour {
 		//for (i = 0; i < pointsCurrent.Length; i++) {
 		//	Debug.Log(i+":"+pointsCurrent[i]);
 		//}
+		return true;
 	}
-	
-	void Draw (){
-		CreatePoints ();
 
+	void CreateMesh(){
 		roadLength = currentPositionsBeziered.Length - 1;
 		float roadPartLength = roadLength*widthDetail;
-
-		if (pointHolder == null) {
-			bool pointFound = false;
-			for(i = 0;i<gameObject.transform.childCount;i++){
-				if(gameObject.transform.GetChild(i).name == "pointHolder"){
-					pointHolder = gameObject.transform.GetChild(i).gameObject;
-					pointFound = true;
-				}
-			}
-			if(!pointFound){
-				pointHolder = new GameObject("pointHolder");
-				pointHolder.transform.parent = gameObject.transform;
-			}
-		}
-
+		
 		MeshFilter meshFilter = gameObject.GetComponent<MeshFilter>();
 		if(meshFilter==null){
 			meshFilter = gameObject.AddComponent<MeshFilter>();
@@ -268,7 +353,7 @@ public class Track : MonoBehaviour {
 		
 		//Vertices
 		trackVertices = new List<Vector3>();
-
+		
 		
 		float[] trackX = new float[widthDetail*2];
 		float widthPartSize = 1.0f/(float)widthDetail;
@@ -278,21 +363,21 @@ public class Track : MonoBehaviour {
 			currentXPart+=widthPartSize;
 			trackX[j+1] = currentXPart;
 		}
-
+		
 		for(i = 0;i < roadLength;i++){
-
+			
 			Vector3 pointPos = currentPositionsBeziered[i]- transform.position;
 			Vector3 pointPosNex = currentPositionsBeziered[i+1]- transform.position;
 			
 			Vector3 newVert;
 			
 			for(j = 0;j < trackX.Length;j+=2){
-			
+				
 				float roadSizeBezier = currentWidths[i];
 				
 				newVert = pointPos+(currentRotations[i]*new Vector3(trackX[j]*roadSizeBezier,0,0));
 				trackVertices.Add(newVert);
-	
+				
 				newVert = pointPos+(currentRotations[i]*new Vector3(trackX[j+1]*roadSizeBezier,0,0));
 				trackVertices.Add(newVert);
 				
@@ -300,7 +385,7 @@ public class Track : MonoBehaviour {
 				
 				newVert = pointPosNex+(currentRotations[i+1]*new Vector3(trackX[j]*roadSizeBezier,0,0));
 				trackVertices.Add(newVert);
-	
+				
 				newVert = pointPosNex+(currentRotations[i+1]*new Vector3(trackX[j+1]*roadSizeBezier,0,0));
 				trackVertices.Add(newVert);
 			}
@@ -364,5 +449,12 @@ public class Track : MonoBehaviour {
 		
 		meshFilter.mesh = trackMesh;
 		meshCollider.sharedMesh = meshFilter.sharedMesh;
+	}
+	
+	void Draw (){
+		bool created = CreatePoints ();
+		if (created) {
+			CreateMesh ();
+		}
 	}
 }

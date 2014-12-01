@@ -6,7 +6,7 @@ using System.Collections;
 using System.IO;
 using System.Text;
 
-public class ObjExporter {
+public class ObjExporterV2 {
 	
 	public static string MeshToString(MeshFilter mf) {
 		Mesh m = mf.sharedMesh;

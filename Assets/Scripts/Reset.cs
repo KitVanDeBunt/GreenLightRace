@@ -13,6 +13,8 @@ public class Reset : MonoBehaviour {
 		if(Input.GetKeyDown(KeyCode.R)){
 			ResetGame();
 		}
+
+		//Debug.Log (Quaternion.);
 	}
 	
 	public void ResetGame(){
