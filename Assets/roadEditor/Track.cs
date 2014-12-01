@@ -8,6 +8,8 @@ public class Track : MonoBehaviour {
 	[SerializeField]
 	private string name = "road";
 	[SerializeField]
+	private IconManager.LabelIcon labelType;
+	[SerializeField]
 	private int roadLength = 1;
 	[SerializeField]
 	private int roadSize = 30;
@@ -113,7 +115,6 @@ public class Track : MonoBehaviour {
 		pointsNew [number] = new GameObject("new point").transform;
 		pointsNew [number].transform.position = pointHolder.transform.position;
 		pointsNew [number].gameObject.AddComponent<TrackPoint>();
-		IconManager.SetIcon (pointsNew [number].gameObject, IconManager.LabelIcon.Orange);
 		if (pointsList == null) {
 			pointsList = new List<Transform>();
 		}
@@ -142,6 +143,7 @@ public class Track : MonoBehaviour {
 			if(pointsNew [i]==null){
 				AddPoint(i);
 			}
+			IconManager.SetIcon (pointsNew [i].gameObject, labelType);
 			for (j = 0; j<pointsNew.Length; j++) {
 				if(i==j){
 
