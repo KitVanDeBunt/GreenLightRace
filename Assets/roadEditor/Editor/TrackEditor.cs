@@ -3,22 +3,39 @@ using System.Collections;
 using UnityEditor;
 
 [CustomEditor(typeof(Track))]
-public class TrackEditor : Editor 
-{
-	Track myTarget;
+[CanEditMultipleObjects]
+public class TrackEditor : Editor {
+	private Object[] myTargets;
+	private Track tempTrack;
+	private int i;
+
 	public override void OnInspectorGUI(){
-		myTarget = (Track)target;
+		myTargets = targets;
+		//myTarget = (Track)target;
+
 		string filename;
 		EditorGUILayout.LabelField("Track Editor");
 		string filePath = EditorGUILayout.TextField("file path:",(Application.dataPath+"/RoadEditor/Exports/"));
 		//string fileName = EditorGUILayout.TextField("file name:",myTarget.name);
 		//fileName+= ".obj";
-		if(GUILayout.Button("Export OBJ")) {
-			ObjExporter.MeshToFile( myTarget.gameObject.GetComponent<MeshFilter>(),filePath,(myTarget.getName+".obj"));
+
+		string multiButton =  "";
+		if(myTargets.Length>1){
+			multiButton +="(multiSelected)";
 		}
-		if(GUILayout.Button("Export OBJ V2")) {
-			ObjExporterV2.MeshToFile( myTarget.gameObject.GetComponent<MeshFilter>(),filePath,(myTarget.getName+".obj"));
+		if (GUILayout.Button ("Export OBJ"+multiButton)) {
+			for (int i = 0; i < myTargets.Length; i++) {
+				tempTrack = (Track)myTargets[i];
+				ObjExporter.MeshToFile (tempTrack.gameObject.GetComponent<MeshFilter> (), filePath, (tempTrack.getName + ".obj"));
+			}
 		}
+		if (GUILayout.Button ("Export OBJ V2"+multiButton)) {
+			for (int i = 0; i < myTargets.Length; i++) {
+				tempTrack = (Track)myTargets[i];
+				ObjExporterV2.MeshToFile (tempTrack.gameObject.GetComponent<MeshFilter> (), filePath, (tempTrack.getName + ".obj"));
+			}
+		}
+
 		EditorApplication.update += (EditorApplication.CallbackFunction)EditortUpdate;
 
 		DrawDefaultInspector ();
@@ -26,7 +43,10 @@ public class TrackEditor : Editor
 
 	public void EditortUpdate(){
 		Repaint ();
-		
-		myTarget.EditortUpdate();
+		myTargets = targets;
+		for (int i = 0; i < myTargets.Length; i++) {
+			tempTrack = (Track)myTargets[i];
+			tempTrack.EditortUpdate ();
+		}
 	}
 }

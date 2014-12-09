@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using System;
 using System.Reflection;
 using UnityEditor;
@@ -37,7 +38,7 @@ public class IconManager {
 	
 	private static GUIContent[] labelIcons;
 	private static GUIContent[] largeIcons;
-	
+
 	public static void SetIcon( GameObject gObj, LabelIcon icon ) {
 		if ( labelIcons == null ) {
 			labelIcons = GetTextures( "sv_label_", string.Empty, 0, 8 );
@@ -72,4 +73,6 @@ public class IconManager {
 		
 		return guiContentArray;
 	}
+
 }
+#endif
