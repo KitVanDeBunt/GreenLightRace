@@ -46,7 +46,9 @@ public class TrackEditor : Editor {
 		myTargets = targets;
 		for (int i = 0; i < myTargets.Length; i++) {
 			tempTrack = (Track)myTargets[i];
-			tempTrack.EditortUpdate ();
+			if(tempTrack!=null){
+				tempTrack.EditortUpdate ();
+			}
 		}
 	}
 }
