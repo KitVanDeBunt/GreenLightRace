@@ -12,10 +12,10 @@ public class Track : MonoBehaviour {
 
 	[SerializeField]
 	private string name = "road";
-	#if UNITY_EDITOR
+#if UNITY_EDITOR
 	[SerializeField]
 	private IconManager.LabelIcon labelType;
-	#endif
+#endif
 	[SerializeField]
 	private int roadLength = 1;
 	[SerializeField]
@@ -77,9 +77,6 @@ public class Track : MonoBehaviour {
 	private List<Vector3> trackVertices;
 	private List<Vector2> trackUvs;
 	private List<int> trackTriangles;
-	private List<Vector3> trackVerticesSide;
-	private List<Vector2> trackUvsSide;
-	private List<int> trackTrianglesSide;
 	private float roadPartLength;
 	private int i;
 	private int j;
@@ -169,9 +166,9 @@ public class Track : MonoBehaviour {
 			if(pointsNew [i]==null){
 				AddPoint(i);
 			}
-			#if UNITY_EDITOR
+#if UNITY_EDITOR
 			IconManager.SetIcon (pointsNew [i].gameObject, labelType);
-			#endif
+#endif
 			for (j = 0; j<pointsNew.Length; j++) {
 				if(i==j){
 
@@ -287,7 +284,6 @@ public class Track : MonoBehaviour {
 		Debug.Log ("bezierApproximateLength: "+bezierApproximateLength);
 		Debug.Log ("bezierTStepSize: "+bezierTStepSize);
 		*/
-		//for (i = 0; i < pointsTemp.Count; i++) {
 		for(t = 0; t < 1;t+=bezierTStepSize){
 			Vector3[] levelPositions = new Vector3[bezierLevels];
 			Vector3[] levelPositionsNew;
@@ -301,43 +297,32 @@ public class Track : MonoBehaviour {
 			
 			for(j = 0; j < bezierLevels+1; j++){
 				int levelPointCalculationLength = ((bezierLevels-1)-j);
-				//Debug.Log("levelPointCalculationLength: "+levelPointCalculationLength);
-				//for(k = 0; k < levelPointsLength; k++){
 				if(j == 0){//first bezierLevels
 					for(l = 0; l < levelPointCalculationLength+1; l++){
-						//Debug.Log("levelPCL: "+l);
 						levelRotations[l] = Quaternion.Lerp(tempListRot[l],tempListRot[l+1],t);
 						levelPositions[l] = Vector3.Lerp(tempListPos[l],tempListPos[l+1],t);
 						levelWidth[l] = Mathf.Lerp(tempListWidth[l],tempListWidth[l+1],t);
 					}
 				}else if(j == bezierLevels){//last bezierLevels
-					//Debug.Log("add:"+levelPositions[0]);
 					pointsBeziered.Add(levelPositions[0]);
 					rotationsBeziered.Add(levelRotations[0]);
 					widthBeziered.Add(levelWidth[0]);
-					//Debug.Log("add: "+l);
 				}else{// in between bezierLevels
 					levelPositionsNew = new Vector3[bezierLevels];
 					levelRotationsNew = new Quaternion[bezierLevels];
 					levelWidthNew = new float[bezierLevels];
 					for(l = 0; l < levelPointCalculationLength+1; l++){
-						//Debug.Log("level--- btw: "+l);
 						levelPositionsNew[l] = Vector3.Lerp(levelPositions[l],levelPositions[l+1],t);
 						levelRotationsNew[l] = Quaternion.Lerp(levelRotations[l],levelRotations[l+1],t);
 						levelWidthNew[l] = Mathf.Lerp(levelWidth[l],levelWidth[l+1],t);
-						//Debug.Log("p:"+l+": "+levelPositionsNew[l]);
 					}
 					levelRotations = levelRotationsNew;
 					levelPositions = levelPositionsNew;
 					levelWidth = levelWidthNew;
 				}
-				//}
 			}
 		}
-		//}
-		//for (i = 0; i < pointsTemp.Count; i++) {
-		//}
-		//add point t 1
+		//add point t 1 (last point)
 		pointsBeziered.Add(Vector3.Lerp(tempListPos[tempListPos.Count-2],tempListPos[tempListPos.Count-1],1));
 		rotationsBeziered.Add(Quaternion.Lerp(tempListRot[tempListRot.Count-2],tempListRot[tempListRot.Count-1],1));
 		widthBeziered.Add(Mathf.Lerp(tempListWidth[tempListWidth.Count-2],tempListWidth[tempListWidth.Count-1],1));
@@ -359,7 +344,7 @@ public class Track : MonoBehaviour {
 		return true;
 	}
 
-	void CreatMainMesh(List<Vector3> vertList,List<Vector2> uvList, List<int> triList){
+	void CreateRoadMeshData(List<Vector3> vertList,List<Vector2> uvList, List<int> triList){
 		//Vertices
 		float[] trackX = new float[widthDetail*2];
 		float widthPartSize = 1.0f/(float)widthDetail;
@@ -405,11 +390,9 @@ public class Track : MonoBehaviour {
 			float texWidthPos = ((i)%widthDetail);
 			//float texLengthPos = (i-(i%widthDetail)/widthDetail);
 			float texLengthPos = (i/widthDetail);
-			//texWidthPos += 1;
 			
 			float luv1 = (texLengthPos*lengthPartSize);
 			float luv2 = ((texLengthPos+1)*lengthPartSize);
-			//Debug.Log(texLengthPos+"\n"+luv1+"  "+luv2);
 			
 			uvList.Add(new Vector2((widthPartSize*texWidthPos),luv1));
 			uvList.Add(new Vector2((widthPartSize*(texWidthPos+1)),luv1));
@@ -436,7 +419,7 @@ public class Track : MonoBehaviour {
 		}
 	}
 
-	void CreatSideMesh(List<Vector3> vertList,List<Vector2> uvList, List<int> triList,TrackSide side){
+	void CreateWallMeshData(List<Vector3> vertList,List<Vector2> uvList, List<int> triList,TrackSide side){
 		//Vertices
 		
 		for(i = 0;i < roadLength;i++){
@@ -448,10 +431,7 @@ public class Track : MonoBehaviour {
 
 			float roadSizeBezier = currentWidths[i];
 			Quaternion TempRot = currentRotations[i];
-			//TempRot.eulerAngles = new Vector3(0,currentRotations[i].y,0);
 			Quaternion TempRot2 = currentRotations[i+1];
-			//TempRot2.eulerAngles = new Vector3(0,currentRotations[i+1].y,0);
-
 			/*
 			 * 
 			Quaternion TempRot = currentRotations[i];
@@ -460,9 +440,6 @@ public class Track : MonoBehaviour {
 			TempRot2.eulerAngles = new Vector3(currentRotations[i+1].x,0,currentRotations[i+1].z);
 			*/
 			if(side == TrackSide.Right){
-
-				//TempRot.eulerAngles = new Vector3(0,currentRotations[i].y,0);
-
 				newVert = pointPos+(currentRotations[i]*new Vector3(roadSizeBezier*0.5f,0f,0));
 				vertList.Add(newVert);
 				
@@ -500,13 +477,10 @@ public class Track : MonoBehaviour {
 		float lengthPartSize = ((1f/pointsPerUnityUnit)/tempAferageWidth);
 		for(i = 0;i < (roadLength);i++){
 			float texWidthPos = ((i)%widthDetail);
-			//float texLengthPos = (i-(i%widthDetail)/widthDetail);
 			float texLengthPos = (i/widthDetail);
-			//texWidthPos += 1;
 			
 			float luv1 = (texLengthPos*lengthPartSize);
 			float luv2 = ((texLengthPos+1)*lengthPartSize);
-			//Debug.Log(texLengthPos+"\n"+luv1+"  "+luv2);
 			
 			uvList.Add(new Vector2((texWidthPos),luv1));
 			uvList.Add(new Vector2(((texWidthPos+1)),luv1));
@@ -531,6 +505,17 @@ public class Track : MonoBehaviour {
 			triList.Add((2+(4*i)));
 			triList.Add((3+(4*i)));
 		}
+	}
+	
+	Mesh DataToMesh(string name, Vector3[] vertices, Vector2[] uvs, int[] triangles){
+		Mesh newMesh = new Mesh();
+		newMesh.name = name;
+		newMesh.vertices = vertices;
+		newMesh.uv = uvs;
+		newMesh.triangles = triangles;
+		newMesh.Optimize();
+		newMesh.RecalculateNormals();
+		return newMesh;
 	}
 
 	void CreateMesh(){
@@ -569,34 +554,22 @@ public class Track : MonoBehaviour {
 		trackVertices = new List<Vector3>();
 		trackUvs = new List<Vector2>();
 		trackTriangles = new List<int>();
-		CreatMainMesh(trackVertices,trackUvs,trackTriangles);
+		CreateRoadMeshData(trackVertices,trackUvs,trackTriangles);
 		
-		trackMesh = new Mesh();
-		trackMesh.name = "roadMesh";
-		trackMesh.vertices = trackVertices.ToArray();
-		trackMesh.uv = trackUvs.ToArray();
-		trackMesh.triangles = trackTriangles.ToArray();
-		trackMesh.Optimize();
-		trackMesh.RecalculateNormals();
+		trackMesh = DataToMesh("roadMesh", trackVertices.ToArray(), trackUvs.ToArray(), trackTriangles.ToArray());
 
 		combine[combineNum].mesh = trackMesh;
 		combine[combineNum].transform = Matrix4x4.identity;
 		combineNum++;
 
 		if(wallLeft){
-			//side left
-			trackVerticesSide = new List<Vector3>();
-			trackUvsSide = new List<Vector2>();
-			trackTrianglesSide = new List<int>();
-			CreatSideMesh(trackVerticesSide,trackUvsSide,trackTrianglesSide,TrackSide.Left);
+			//track wall left
+			trackVertices = new List<Vector3>();
+			trackUvs = new List<Vector2>();
+			trackTriangles = new List<int>();
+			CreateWallMeshData(trackVertices,trackUvs,trackTriangles,TrackSide.Left);
 
-			trackMesh = new Mesh();
-			trackMesh.name = "roadMeshSide1";
-			trackMesh.vertices = trackVerticesSide.ToArray();
-			trackMesh.uv = trackUvsSide.ToArray();
-			trackMesh.triangles = trackTrianglesSide.ToArray();
-			trackMesh.Optimize();
-			trackMesh.RecalculateNormals();
+			trackMesh = DataToMesh("roadMeshSideLeft", trackVertices.ToArray(), trackUvs.ToArray(), trackTriangles.ToArray());
 
 			combine[combineNum].mesh = trackMesh;
 			combine[combineNum].transform = Matrix4x4.identity;
@@ -604,22 +577,14 @@ public class Track : MonoBehaviour {
 		}
 
 		if(wallRight){
-			//side right
-			trackVerticesSide = new List<Vector3>();
-			trackUvsSide = new List<Vector2>();
-			trackTrianglesSide = new List<int>();
-			CreatSideMesh(trackVerticesSide,trackUvsSide,trackTrianglesSide,TrackSide.Right);
+			//track wall right
+			trackVertices = new List<Vector3>();
+			trackUvs = new List<Vector2>();
+			trackTriangles = new List<int>();
+			CreateWallMeshData(trackVertices,trackUvs,trackTriangles,TrackSide.Right);
+			
+			trackMesh = DataToMesh("roadMeshSideRight", trackVertices.ToArray(), trackUvs.ToArray(), trackTriangles.ToArray());
 
-			trackMesh = new Mesh();
-			trackMesh.name = "roadMeshSide1";
-			trackMesh.vertices = trackVerticesSide.ToArray();
-			trackMesh.uv = trackUvsSide.ToArray();
-			trackMesh.triangles = trackTrianglesSide.ToArray();
-			trackMesh.Optimize();
-			trackMesh.RecalculateNormals();
-
-			//combine[1].mesh = trackMeshSide1;
-			//combine[1].transform = Matrix4x4.identity;
 			combine[combineNum].mesh = trackMesh;
 			combine[combineNum].transform = Matrix4x4.identity;
 			combineNum++;
