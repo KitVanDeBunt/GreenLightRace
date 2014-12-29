@@ -29,9 +29,11 @@ public class TrackPoint : MonoBehaviour{
 		checkRotation = transform.rotation;
 		checkWidth = width;
 	}
-	private void FixedUpdate(){
+	
+	// uncomment if u want to edit in play mode
+	/*private void FixedUpdate(){
 		Loop ();
-	}
+	}*/
 
 	public void EditortUpdate(){
 		Loop ();
@@ -47,10 +49,9 @@ public class TrackPoint : MonoBehaviour{
 
 	private void BindPointLoop(){
 		if (bindPoint != null) {
-			//
 			bindPointScript = bindPoint.GetComponent<TrackPoint>();
 
-			//check update
+			//check if update is needed
 			updatePoint = false;
 			if(transform.position!=checkPosition){
 				updatePoint = true;
@@ -60,12 +61,6 @@ public class TrackPoint : MonoBehaviour{
 					updatePoint = true;
 				}
 			}
-			if(!updatePoint){
-				if(width!=checkWidth){
-					updatePoint = true;
-				}
-			}
-			
 			if(!updatePoint){
 				if(width!=checkWidth){
 					updatePoint = true;
@@ -85,15 +80,6 @@ public class TrackPoint : MonoBehaviour{
 		checkRotation = pointToClone.transform.localRotation;
 		checkWidth = pointToClone.width;
 		if (!selfCall) {
-			//Debug.Log("flip");
-			//Vector3 newRot = pointToClone.transform.rotation.eulerAngles;
-			//newRot = new Vector3(newRot.x,-newRot.y,newRot.z);
-			//Quaternion newQuat = new Quaternion();
-			//newQuat.eulerAngles  = newRot;
-			//pointToClone.transform.localRotation = newQuat;
-
-			//pointToClone.transform.Rotate(180,180,180,Space.Self);
-			//pointToClone.transform.rotation = Quaternion.Inverse(pointToClone.transform.rotation);
 			Quaternion rot = pointToClone.transform.rotation;
 			rot.x = -pointToClone.transform.rotation.x;
 			rot.y = -pointToClone.transform.rotation.y;
@@ -103,8 +89,7 @@ public class TrackPoint : MonoBehaviour{
 		} else {
 			checkRotation = pointToClone.transform.rotation;
 		}
-
-
+		
 		transform.position = checkPosition;
 		transform.rotation = checkRotation;
 		width = checkWidth;

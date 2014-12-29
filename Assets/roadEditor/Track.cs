@@ -5,36 +5,19 @@ using System.Collections.Generic;
 
 [ExecuteInEditMode]
 public class Track : MonoBehaviour {
+	
+	[SerializeField]
+	private bool updateInGame = false;
+	
+	[SerializeField]
+	private TrackSettings trackSettings;
+	
 	enum TrackSide{
 		Left = 0,
 		Right = 1
 	}
-
-	[SerializeField]
-	private string name = "road";
-#if UNITY_EDITOR
-	[SerializeField]
-	private IconManager.LabelIcon labelType;
-#endif
-	[SerializeField]
-	private int roadLength = 1;
-	[SerializeField]
-	private Material trackMaterial;
-	[SerializeField]
-	private float pointsPerUnityUnit = 1;
-	[SerializeField]
-	private int widthDetail = 1;
 	[SerializeField]
 	private Transform[] pointsNew;
-
-	[SerializeField]
-	private bool wallRight = true;
-	[SerializeField]
-	private float wallRightHeight  = 5;
-	[SerializeField]
-	private bool wallLeft = true;
-	[SerializeField]
-	private float WallLefttHeight  = 5;
 
 	[HideInInspector]
 	[SerializeField]
@@ -60,29 +43,23 @@ public class Track : MonoBehaviour {
 	[SerializeField]
 	private float[] currentWidthsSource;
 
-	private Mesh trackMesh;
-	[HideInInspector]
 	[SerializeField]
-	private Mesh TrackRightBorderMesh;
-	[HideInInspector]
-	[SerializeField]
-	private Mesh TrackLeftBorderMesh;
-	[HideInInspector]
-	[SerializeField]
-
 	private GameObject pointHolder;
-
+	
+	private Mesh tempTrackMesh;
 	private bool needMorePoints;
 	private bool needSetPointsSize;
 	private List<Vector3> trackVertices;
 	private List<Vector2> trackUvs;
 	private List<int> trackTriangles;
 	private float roadPartLength;
+	private int roadLength = 1;
 	private int i;
 	private int j;
 	private int k;
 	private int l;
 	private float t;
+	private int updateTimer = 0;
 	
 	public string getName{
 		get{
@@ -95,23 +72,25 @@ public class Track : MonoBehaviour {
 		needSetPointsSize = false;
 		Loop();
 	}
-
-	int timer = 0;
+	
 	public void EditortUpdate(){
-		timer++;
-		if (timer % 100 == 0) {
-			Loop();
+		updateTimer++;
+		if (updateTimer % 100 == 0) {
+			if(!Application.isPlaying){
+				Loop();
+			}
 		}
 	}
 
 	void FixedUpdate(){
-		Loop ();
+		if(updateInGame){
+			Loop ();
+		}
 	}
 
 	void Loop(){
 		bool updateTrack = false;
 		if (needMorePoints) {
-			//Debug.Log("need more then 1 point!!");
 			if(pointsNew.Length>1){
 				needMorePoints = false;
 				updateTrack = true;
@@ -146,45 +125,48 @@ public class Track : MonoBehaviour {
 
 	void UpdateTrackIfNeeded (){
 		bool redo =  false;
-
+		
+		// create or find pointholder
 		if (pointHolder == null) {
-			bool pointFound = false;
+			bool pointHolderFound = false;
 			for(i = 0;i<gameObject.transform.childCount;i++){
 				if(gameObject.transform.GetChild(i).name == "pointHolder"){
 					pointHolder = gameObject.transform.GetChild(i).gameObject;
-					pointFound = true;
+					pointHolderFound = true;
 				}
 			}
-			if(!pointFound){
+			if(!pointHolderFound){
 				pointHolder = new GameObject("pointHolder");
+				pointHolder.transform.position = gameObject.transform.position;
 				pointHolder.transform.parent = gameObject.transform;
 			}
 		}
 
-		//if
+		// add new points
 		for (i = 0; i<pointsNew.Length; i++) {
 			if(pointsNew [i]==null){
 				AddPoint(i);
 			}
 #if UNITY_EDITOR
-			IconManager.SetIcon (pointsNew [i].gameObject, labelType);
+			IconManager.SetIcon (pointsNew [i].gameObject, trackSettings.labelType);
 #endif
 			for (j = 0; j<pointsNew.Length; j++) {
-				if(i==j){
-
-				}else{
+				if(i!=j){
 					if(pointsNew[i]==pointsNew[j]){
 						AddPoint(i);
 					}
 				}
-
 			}
 			pointsNew [i].transform.parent = pointHolder.transform;
 		}
-
+		
+		// check point length change
 		if (pointsNew.Length != currentPositionsSource.Length) {
 			redo = true;
-		} else if(!redo){
+		}
+		
+		// check position change
+		if(!redo){
 			for (i = 0; i<pointsNew.Length; i++) {
 				if(pointsNew[i].position!=currentPositionsSource[i]){
 					redo = true;
@@ -192,6 +174,8 @@ public class Track : MonoBehaviour {
 				}
 			}
 		}
+		
+		// check rotaition change
 		if (!redo) {
 			if (pointsNew.Length != currentRottationsSource.Length) {
 					redo = true;
@@ -205,6 +189,7 @@ public class Track : MonoBehaviour {
 			}
 		}
 		
+		// check width change
 		if (!redo) {
 			if (pointsNew.Length != currentWidthsSource.Length) {
 				redo = true;
@@ -218,7 +203,17 @@ public class Track : MonoBehaviour {
 			}
 		}
 		
+		// check settings change
+		if (!redo) {
+			if(trackSettings.CheckUpdated()){
+				redo = true;
+				trackSettings.Save();
+			}
+		}
+		
+		// update track if needed
 		if (redo) {
+		
 			//delete old points
 			int pointCount = pointsList.Count;
 			for (i = pointCount - 1; i > 0; i--) {
@@ -229,35 +224,41 @@ public class Track : MonoBehaviour {
 						break;
 					}
 				}
+				
 				if(!pointinUse){
-					if(pointsList[i]!=null){
-					if(pointsList[i].gameObject!=null){
+					if(pointsList[i]!=null && pointsList[i].gameObject!=null){
 						if(Application.isEditor){
 							GameObject.DestroyImmediate(pointsList[i].gameObject);
 						}else{
 							GameObject.Destroy(pointsList[i]);
 						}
 					}
-					}
 					pointsList.Remove(pointsList[i]);
 				}
 			}
-			Debug.Log("redo");
+			Debug.Log("update track");
 			Draw ();
 		}
 	}
+	
+	void Draw (){
+		bool created = CreateBezieredPoints ();
+		if (created) {
+			CreateMesh ();
+		}
+	}
 
-	bool CreatePoints (){
+	bool CreateBezieredPoints (){
 		if (pointsNew.Length < 2) {
 			Debug.LogError("need more then 1 point!!");
 			needMorePoints = true;
 			return false;
 		}
-
+		
+		//create temporary source point lists
 		List<Vector3> tempListPos = new List<Vector3> (); 
 		List<Quaternion> tempListRot = new List<Quaternion> (); 
 		List<float> tempListWidth = new List<float> (); 
-		
 		for (i = 0; i<pointsNew.Length; i++) {
 			pointsNew[i].name = name+" p: "+i;
 			tempListPos.Add(pointsNew[i].position);
@@ -266,24 +267,28 @@ public class Track : MonoBehaviour {
 			tempListWidth.Add(trackPoint.width);
 		}
 		
+		//create temporary beziered point lists
 		List<Vector3> pointsBeziered = new List<Vector3> ();
 		List<Quaternion> rotationsBeziered = new List<Quaternion> ();
 		List<float> widthBeziered = new List<float> ();
 		
+		// create other variables needed
 		int bezierLevels = tempListPos.Count +1 -2;
 		float bezierApproximateLength = 0;
-		
 		for (i = 0; i < bezierLevels; i++) {
 			bezierApproximateLength += Vector3.Distance( tempListPos[i],tempListPos[i+1]);
 		}
-		float bezierSubsections = bezierApproximateLength * pointsPerUnityUnit;
+		float bezierSubsections = bezierApproximateLength * trackSettings.pointsPerUnityUnit;
 		float bezierTStepSize = 1f / bezierSubsections;
+		
 		/*
 		Debug.Log ("bezierSubsections: "+bezierSubsections);
 		Debug.Log ("bezierLevels: "+bezierLevels);
 		Debug.Log ("bezierApproximateLength: "+bezierApproximateLength);
 		Debug.Log ("bezierTStepSize: "+bezierTStepSize);
 		*/
+		
+		// create beziered point from points
 		for(t = 0; t < 1;t+=bezierTStepSize){
 			Vector3[] levelPositions = new Vector3[bezierLevels];
 			Vector3[] levelPositionsNew;
@@ -297,17 +302,20 @@ public class Track : MonoBehaviour {
 			
 			for(j = 0; j < bezierLevels+1; j++){
 				int levelPointCalculationLength = ((bezierLevels-1)-j);
-				if(j == 0){//first bezierLevels
+				//first bezierLevels
+				if(j == 0){
 					for(l = 0; l < levelPointCalculationLength+1; l++){
 						levelRotations[l] = Quaternion.Lerp(tempListRot[l],tempListRot[l+1],t);
 						levelPositions[l] = Vector3.Lerp(tempListPos[l],tempListPos[l+1],t);
 						levelWidth[l] = Mathf.Lerp(tempListWidth[l],tempListWidth[l+1],t);
 					}
-				}else if(j == bezierLevels){//last bezierLevels
+				//last bezierLevels
+				}else if(j == bezierLevels){
 					pointsBeziered.Add(levelPositions[0]);
 					rotationsBeziered.Add(levelRotations[0]);
 					widthBeziered.Add(levelWidth[0]);
-				}else{// in between bezierLevels
+				// in between bezierLevels
+				}else{
 					levelPositionsNew = new Vector3[bezierLevels];
 					levelRotationsNew = new Quaternion[bezierLevels];
 					levelWidthNew = new float[bezierLevels];
@@ -322,6 +330,7 @@ public class Track : MonoBehaviour {
 				}
 			}
 		}
+		
 		//add point t 1 (last point)
 		pointsBeziered.Add(Vector3.Lerp(tempListPos[tempListPos.Count-2],tempListPos[tempListPos.Count-1],1));
 		rotationsBeziered.Add(Quaternion.Lerp(tempListRot[tempListRot.Count-2],tempListRot[tempListRot.Count-1],1));
@@ -345,16 +354,16 @@ public class Track : MonoBehaviour {
 	}
 
 	void CreateRoadMeshData(List<Vector3> vertList,List<Vector2> uvList, List<int> triList){
+		
 		//Vertices
-		float[] trackX = new float[widthDetail*2];
-		float widthPartSize = 1.0f/(float)widthDetail;
+		float[] trackX = new float[trackSettings.widthDetail*2];
+		float widthPartSize = 1.0f/(float)trackSettings.widthDetail;
 		float currentXPart = -0.5f;
 		for(j = 0;j < trackX.Length;j+=2){
 			trackX[j] = currentXPart;
 			currentXPart+=widthPartSize;
 			trackX[j+1] = currentXPart;
 		}
-		
 		for(i = 0;i < roadLength;i++){
 			
 			Vector3 pointPos = currentPositionsBeziered[i]- transform.position;
@@ -385,25 +394,23 @@ public class Track : MonoBehaviour {
 		
 		//uv
 		float tempAferageWidth = 25;/////////////
-		float lengthPartSize = ((1f/pointsPerUnityUnit)/tempAferageWidth);
+		float lengthPartSize = ((1f/trackSettings.pointsPerUnityUnit)/tempAferageWidth);
 		for(i = 0;i < roadPartLength;i++){
-			float texWidthPos = ((i)%widthDetail);
+			float texWidthPos = ((i)%trackSettings.widthDetail);
 			//float texLengthPos = (i-(i%widthDetail)/widthDetail);
-			float texLengthPos = (i/widthDetail);
+			float texLengthPos = (i/trackSettings.widthDetail);
 			
 			float luv1 = (texLengthPos*lengthPartSize);
 			float luv2 = ((texLengthPos+1)*lengthPartSize);
 			
+			//0.0f,0.0f
+			//1.0f,0.0f
+			//0.0f,1.0f
+			//1.0f,1.0f
 			uvList.Add(new Vector2((widthPartSize*texWidthPos),luv1));
 			uvList.Add(new Vector2((widthPartSize*(texWidthPos+1)),luv1));
 			uvList.Add(new Vector2((widthPartSize*texWidthPos),luv2));
 			uvList.Add(new Vector2((widthPartSize*(texWidthPos+1)),luv2));
-			/*
-			uvList.Add(new Vector2( 0.0f,0.0f));
-			uvList.Add(new Vector2( 1.0f,0.0f));
-			uvList.Add(new Vector2( 0.0f,1.0f));
-			uvList.Add(new Vector2( 1.0f,1.0f));
-			*/
 		}
 		
 		//triangles
@@ -420,8 +427,8 @@ public class Track : MonoBehaviour {
 	}
 
 	void CreateWallMeshData(List<Vector3> vertList,List<Vector2> uvList, List<int> triList,TrackSide side){
-		//Vertices
 		
+		//Vertices
 		for(i = 0;i < roadLength;i++){
 			
 			Vector3 pointPos = currentPositionsBeziered[i]- transform.position;
@@ -432,18 +439,12 @@ public class Track : MonoBehaviour {
 			float roadSizeBezier = currentWidths[i];
 			Quaternion TempRot = currentRotations[i];
 			Quaternion TempRot2 = currentRotations[i+1];
-			/*
-			 * 
-			Quaternion TempRot = currentRotations[i];
-			TempRot.eulerAngles = new Vector3(currentRotations[i].x,0,currentRotations[i].z);
-			Quaternion TempRot2 = currentRotations[i];
-			TempRot2.eulerAngles = new Vector3(currentRotations[i+1].x,0,currentRotations[i+1].z);
-			*/
+			
 			if(side == TrackSide.Right){
 				newVert = pointPos+(currentRotations[i]*new Vector3(roadSizeBezier*0.5f,0f,0));
 				vertList.Add(newVert);
 				
-				newVert = pointPos+(currentRotations[i]*new Vector3(roadSizeBezier*0.5f,0,0))+(TempRot*new Vector3(0,wallRightHeight,0));
+				newVert = pointPos+(currentRotations[i]*new Vector3(roadSizeBezier*0.5f,0,0))+(TempRot*new Vector3(0,trackSettings.wallRightHeight,0));
 				vertList.Add(newVert);
 				
 				roadSizeBezier = currentWidths[i+1];
@@ -451,11 +452,11 @@ public class Track : MonoBehaviour {
 				newVert = pointPosNex+(currentRotations[i+1]*new Vector3(roadSizeBezier*0.5f,0,0));
 				vertList.Add(newVert);
 				
-				newVert = pointPosNex+(currentRotations[i+1]*new Vector3(roadSizeBezier*0.5f,0f,0))+(TempRot2*new Vector3(0,wallRightHeight,0));
+				newVert = pointPosNex+(currentRotations[i+1]*new Vector3(roadSizeBezier*0.5f,0f,0))+(TempRot2*new Vector3(0,trackSettings.wallRightHeight,0));
 				vertList.Add(newVert);
 			}else{
 
-				newVert = pointPos+(currentRotations[i]*new Vector3(roadSizeBezier*-0.5f,0,0))+(TempRot*new Vector3(0,WallLefttHeight,0f));
+				newVert = pointPos+(currentRotations[i]*new Vector3(roadSizeBezier*-0.5f,0,0))+(TempRot*new Vector3(0,trackSettings.WallLefttHeight,0f));
 				vertList.Add(newVert);
 				
 				newVert = pointPos+(currentRotations[i]*new Vector3(roadSizeBezier*-0.5f,0f,0));
@@ -463,7 +464,7 @@ public class Track : MonoBehaviour {
 				
 				roadSizeBezier = currentWidths[i+1];
 
-				newVert = pointPosNex+(currentRotations[i+1]*new Vector3(roadSizeBezier*-0.5f,0,0))+(TempRot2*new Vector3(0,WallLefttHeight,0f));
+				newVert = pointPosNex+(currentRotations[i+1]*new Vector3(roadSizeBezier*-0.5f,0,0))+(TempRot2*new Vector3(0,trackSettings.WallLefttHeight,0f));
 				vertList.Add(newVert);
 				
 				newVert = pointPosNex+(currentRotations[i+1]*new Vector3(roadSizeBezier*-0.5f,0f,0));
@@ -471,27 +472,24 @@ public class Track : MonoBehaviour {
 			}
 		}
 		
-		
-		//uv
-		float tempAferageWidth = 25;/////////////
-		float lengthPartSize = ((1f/pointsPerUnityUnit)/tempAferageWidth);
+		//uvs
+		float tempAferageWidth = 25;///////////// work in progress
+		float lengthPartSize = ((1f/trackSettings.pointsPerUnityUnit)/tempAferageWidth);
 		for(i = 0;i < (roadLength);i++){
-			float texWidthPos = ((i)%widthDetail);
-			float texLengthPos = (i/widthDetail);
+			float texWidthPos = ((i)%trackSettings.widthDetail);
+			float texLengthPos = (i/trackSettings.widthDetail);
 			
 			float luv1 = (texLengthPos*lengthPartSize);
 			float luv2 = ((texLengthPos+1)*lengthPartSize);
 			
+			//0.0f,0.0f
+			//1.0f,0.0f
+			//0.0f,1.0f
+			//1.0f,1.0f
 			uvList.Add(new Vector2((texWidthPos),luv1));
 			uvList.Add(new Vector2(((texWidthPos+1)),luv1));
 			uvList.Add(new Vector2((texWidthPos),luv2));
 			uvList.Add(new Vector2(((texWidthPos+1)),luv2));
-			/*
-			uvList.Add(new Vector2( 0.0f,0.0f));
-			uvList.Add(new Vector2( 1.0f,0.0f));
-			uvList.Add(new Vector2( 0.0f,1.0f));
-			uvList.Add(new Vector2( 1.0f,1.0f));
-			*/
 		}
 		
 		//triangles
@@ -519,32 +517,31 @@ public class Track : MonoBehaviour {
 	}
 
 	void CreateMesh(){
-
-		// main track
-		roadLength = currentPositionsBeziered.Length - 1;
-		roadPartLength = roadLength*widthDetail;
-		
+	
+		// add components if needed
 		MeshFilter meshFilter = gameObject.GetComponent<MeshFilter>();
 		if(meshFilter==null){
 			meshFilter = gameObject.AddComponent<MeshFilter>();
-			meshFilter.sharedMesh = new Mesh();
 		}
-		
+		meshFilter.sharedMesh = new Mesh();
 		MeshRenderer meshRenderer = gameObject.GetComponent<MeshRenderer>();
 		if(meshRenderer==null){
 			meshRenderer = gameObject.AddComponent<MeshRenderer>();
 		}
-		
 		MeshCollider meshCollider = gameObject.GetComponent<MeshCollider>();
 		if(meshCollider==null){
 			meshCollider = gameObject.AddComponent<MeshCollider>();
 		}
-
+		meshCollider.smoothSphereCollisions = trackSettings.smoothSphereCollision;
+		
+		// variables needed
+		roadLength = currentPositionsBeziered.Length - 1;
+		roadPartLength = roadLength*trackSettings.widthDetail;
 		int combineSize = 1;
-		if(wallRight){
+		if(trackSettings.wallRight){
 			combineSize++;
 		}
-		if(wallLeft){
+		if(trackSettings.wallLeft){
 			combineSize++;
 		}
 		CombineInstance[] combine = new CombineInstance[combineSize];
@@ -556,50 +553,50 @@ public class Track : MonoBehaviour {
 		trackTriangles = new List<int>();
 		CreateRoadMeshData(trackVertices,trackUvs,trackTriangles);
 		
-		trackMesh = DataToMesh("roadMesh", trackVertices.ToArray(), trackUvs.ToArray(), trackTriangles.ToArray());
+		tempTrackMesh = DataToMesh("roadMesh", trackVertices.ToArray(), trackUvs.ToArray(), trackTriangles.ToArray());
 
-		combine[combineNum].mesh = trackMesh;
+		combine[combineNum].mesh = tempTrackMesh;
 		combine[combineNum].transform = Matrix4x4.identity;
 		combineNum++;
-
-		if(wallLeft){
-			//track wall left
+		
+		//create left wall mesh data and add it to the CombineInstance
+		if(trackSettings.wallLeft){
 			trackVertices = new List<Vector3>();
 			trackUvs = new List<Vector2>();
 			trackTriangles = new List<int>();
 			CreateWallMeshData(trackVertices,trackUvs,trackTriangles,TrackSide.Left);
 
-			trackMesh = DataToMesh("roadMeshSideLeft", trackVertices.ToArray(), trackUvs.ToArray(), trackTriangles.ToArray());
+			tempTrackMesh = DataToMesh("roadMeshSideLeft", trackVertices.ToArray(), trackUvs.ToArray(), trackTriangles.ToArray());
 
-			combine[combineNum].mesh = trackMesh;
+			combine[combineNum].mesh = tempTrackMesh;
 			combine[combineNum].transform = Matrix4x4.identity;
 			combineNum++;
 		}
-
-		if(wallRight){
-			//track wall right
+		
+		//create right wall mesh data and add it to the CombineInstance
+		if(trackSettings.wallRight){
 			trackVertices = new List<Vector3>();
 			trackUvs = new List<Vector2>();
 			trackTriangles = new List<int>();
 			CreateWallMeshData(trackVertices,trackUvs,trackTriangles,TrackSide.Right);
 			
-			trackMesh = DataToMesh("roadMeshSideRight", trackVertices.ToArray(), trackUvs.ToArray(), trackTriangles.ToArray());
+			tempTrackMesh = DataToMesh("roadMeshSideRight", trackVertices.ToArray(), trackUvs.ToArray(), trackTriangles.ToArray());
 
-			combine[combineNum].mesh = trackMesh;
+			combine[combineNum].mesh = tempTrackMesh;
 			combine[combineNum].transform = Matrix4x4.identity;
 			combineNum++;
 		}
-		meshRenderer.material = trackMaterial;
-
+		
+		//pass the data to the MeshCollider and MeshFilter
 		meshFilter.sharedMesh.CombineMeshes(combine);
 		meshCollider.sharedMesh.CombineMeshes(combine);
-		//meshCollider.sharedMesh = meshFilter.sharedMesh;
-	}
-	
-	void Draw (){
-		bool created = CreatePoints ();
-		if (created) {
-			CreateMesh ();
-		}
+		meshCollider.enabled = false;
+		meshCollider.enabled = true;
+		
+		
+		//set material
+		meshRenderer.material = trackSettings.trackMaterial;
 	}
 }
+
+

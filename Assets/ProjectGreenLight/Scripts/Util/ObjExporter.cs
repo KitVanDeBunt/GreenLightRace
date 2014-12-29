@@ -8,15 +8,24 @@ using System.Text;
 
 public class ObjExporter {
 	
-	public static string MeshToString(MeshFilter mf) {
+	public static string MeshToString(MeshFilter mf, bool invertXAxis = false, bool useWorldMatrix = false) {
 		Mesh m = mf.sharedMesh;
 		Material[] mats = mf.renderer.sharedMaterials;
 		
 		StringBuilder sb = new StringBuilder();
 		
 		sb.Append("g ").Append(mf.name).Append("\n");
+		
 		foreach(Vector3 v in m.vertices) {
-			sb.Append(string.Format("v {0} {1} {2}\n",-v.x,v.y,v.z));
+			Vector3 vertexPos = new Vector3(v.x,v.y,v.z);
+			if(useWorldMatrix){
+				vertexPos = mf.transform.localToWorldMatrix.MultiplyPoint(vertexPos);
+			}
+			if(invertXAxis){
+				sb.Append(string.Format("v {0} {1} {2}\n",-vertexPos.x,vertexPos.y,vertexPos.z));
+			}else{
+				sb.Append(string.Format("v {0} {1} {2}\n",vertexPos.x,vertexPos.y,vertexPos.z));
+			}
 		}
 		sb.Append("\n");
 		foreach(Vector3 v in m.normals) {
@@ -40,12 +49,10 @@ public class ObjExporter {
 		return sb.ToString();
 	}
 	
-	public static void MeshToFile(MeshFilter mf, string path, string filename) {
+	public static void MeshToFile(MeshFilter mf, string path, string filename, bool invertXAxis = false, bool useWorldMatrix = false) {
 		string file = (path+filename);  
-		using (StreamWriter sw = new StreamWriter(file)) 
-		{
-			Debug.Log("o0o0o0oo0o0o0o0o0o-export\n"+file);
-			sw.Write(MeshToString(mf));
+		using (StreamWriter sw = new StreamWriter(file)) {
+			sw.Write(MeshToString(mf,invertXAxis,useWorldMatrix));
 		}
 	}
 }

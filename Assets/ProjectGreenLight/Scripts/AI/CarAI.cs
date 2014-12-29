@@ -31,7 +31,5 @@ public class CarAI : MonoBehaviour
 
 		//test += currentDirection;
 
-		Debug.Log(((-test) + (currentDirection - 90)));
-
 	}
 }

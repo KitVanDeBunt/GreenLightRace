@@ -7,32 +7,27 @@ using UnityEditor;
 public class TrackEditor : Editor {
 	private Object[] myTargets;
 	private Track tempTrack;
+	private bool worldMatrix = true;
+	private bool correctedXAxisExport = true;
 	private int i;
 
 	public override void OnInspectorGUI(){
 		myTargets = targets;
-		//myTarget = (Track)target;
 
-		string filename;
-		EditorGUILayout.LabelField("Track Editor");
 		string filePath = EditorGUILayout.TextField("file path:",(Application.dataPath+"/RoadEditor/Exports/"));
-		//string fileName = EditorGUILayout.TextField("file name:",myTarget.name);
-		//fileName+= ".obj";
-
-		string multiButton =  "";
+		
+		
+		string multiText =  "";
 		if(myTargets.Length>1){
-			multiButton +="(multiSelected)";
+			multiText +="(multiSelected)";
 		}
-		if (GUILayout.Button ("Export OBJ"+multiButton)) {
+		worldMatrix = GUILayout.Toggle(worldMatrix,"Use World Space Positions");
+		correctedXAxisExport = GUILayout.Toggle(correctedXAxisExport,"export with inverted x-axis ");
+		// export
+		if (GUILayout.Button ("Export OBJ"+multiText)) {
 			for (int i = 0; i < myTargets.Length; i++) {
 				tempTrack = (Track)myTargets[i];
-				ObjExporter.MeshToFile (tempTrack.gameObject.GetComponent<MeshFilter> (), filePath, (tempTrack.getName + ".obj"));
-			}
-		}
-		if (GUILayout.Button ("Export OBJ V2"+multiButton)) {
-			for (int i = 0; i < myTargets.Length; i++) {
-				tempTrack = (Track)myTargets[i];
-				ObjExporterV2.MeshToFile (tempTrack.gameObject.GetComponent<MeshFilter> (), filePath, (tempTrack.getName + ".obj"));
+				ObjExporter.MeshToFile (tempTrack.gameObject.GetComponent<MeshFilter> (), filePath, (tempTrack.getName + ".obj"),correctedXAxisExport, worldMatrix);
 			}
 		}
 
@@ -40,7 +35,8 @@ public class TrackEditor : Editor {
 
 		DrawDefaultInspector ();
 	}
-
+	
+	// calls EditortUpdate on all selected tracks
 	public void EditortUpdate(){
 		Repaint ();
 		myTargets = targets;
