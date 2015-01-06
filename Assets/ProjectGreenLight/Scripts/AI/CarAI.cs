@@ -3,33 +3,77 @@ using System.Collections;
 
 public class CarAI : MonoBehaviour 
 {
+	private WorldPath worldpath;
+	private int nextPointID = 0;
 	private Vector3 nextPoint;
+	private Node nextNode;
+
 	private CarControl2 control;
 
 	void Start () 
 	{
+		worldpath = GameObject.Find("World").GetComponent<WorldPath>();
 		control = gameObject.GetComponent<CarControl2> ();
-		nextPoint = new Vector3(1, 0, 1);
+
+		nextPoint = worldpath.getNextPointByID(nextPointID);
+		nextNode = worldpath.getNodeByID(nextPointID);
 	}
 
 	void Update () 
 	{
-		float currentDirection = 0.0F;
-		Vector3 currentAxis = Vector3.zero;
-		transform.rotation.ToAngleAxis(out currentDirection, out currentAxis);
-		/*
-		float targetDirection = Vector3.Angle(transform.position, nextPoint);
-		targetDirection = Vector2.Angle (new Vector2 (transform.position.x, transform.position.z), new Vector2 (0, 0));
+		Vector3 _direction = (nextPoint - transform.position).normalized;
+		Quaternion _lookRotation = Quaternion.LookRotation(_direction);
+		_lookRotation = Quaternion.Euler(0,_lookRotation.eulerAngles.y,0);
 
-		Vector3 test = transform.position - nextPoint;
-		float a = Mathf.Atan2(test.y, test.x) * 180f / Mathf.PI;
+		float r = fixAngle(_lookRotation.eulerAngles.y - fixAngle(transform.rotation.eulerAngles.y));
 
-		Debug.Log (a);*/
+		if(control.Speed < nextNode.maxSpeed)
+		{
+			control.aiInputMoter = 1f;
+		}
+		else
+		{
+			control.aiInputMoter = 0f;
+		}
 
+		if(Mathf.Abs(r) < 10)
+		{
+			control.aiInputSteer = maxSteer(r / 15f);
+		}
+		else
+		{
+			control.aiInputSteer = maxSteer(r);
+		}
 
-		float test = Mathf.Atan2((nextPoint.z - transform.position.z), (nextPoint.x - transform.position.x)) * Mathf.Rad2Deg;
+		if(nextNode.checkDistance(new Vector2(transform.position.x, transform.position.z)))
+		{
+			nextPointID = worldpath.getNextID(nextPointID);
+			nextPoint = worldpath.getNextPointByID(nextPointID);
+			nextNode = worldpath.getNodeByID(nextPointID);
+		}
 
-		//test += currentDirection;
+		//Debug.Log(control.aiInputSteer + " " + r);
+	}
 
+	private float maxSteer(float a)
+	{
+		if(a < -1)
+		{
+			return -1;
+		}
+		if(a > 1)
+		{
+			return 1;
+		}
+		return a;
+	}
+
+	private float fixAngle(float a)
+	{
+		if(a > 180)
+		{
+			a -= 360;
+		}
+		return a;
 	}
 }

@@ -21,6 +21,9 @@ public class CarControl2 : MonoBehaviour {
 	private float EngineRPM = 0f;
 	private float motorInput = 0f;
 
+	public float aiInputMoter = 0f;
+	public float aiInputSteer = 0f;
+
 	void Start () 
 	{
 		rigidbody.centerOfMass = new Vector3(COM.localPosition.x * transform.localScale.x, COM.localPosition.y * transform.localScale.y, COM.localPosition.z * transform.localScale.z);
@@ -35,8 +38,8 @@ public class CarControl2 : MonoBehaviour {
 		ShiftGears();
 		
 		//Input For MotorInput.
-		motorInput = Input.GetAxis("Vertical");
-		
+		motorInput = aiInputMoter;//Input.GetAxis("Vertical");
+
 		//Audio
 		//audio.pitch = Mathf.Abs(EngineRPM / MaxEngineRPM) + 1.0;
 		//if (audio.pitch > 2.0) {
@@ -44,8 +47,8 @@ public class CarControl2 : MonoBehaviour {
 		//}
 		
 		//Steering
-		Wheel_FL.steerAngle = SteerAngle * Input.GetAxis("Horizontal");
-		Wheel_FR.steerAngle = SteerAngle * Input.GetAxis("Horizontal");
+		Wheel_FL.steerAngle = SteerAngle * aiInputSteer;//Input.GetAxis("Horizontal");
+		Wheel_FR.steerAngle = SteerAngle * aiInputSteer;//Input.GetAxis("Horizontal");
 		
 		//Speed Limiter.
 		if(Speed > maxSpeed)
@@ -55,8 +58,8 @@ public class CarControl2 : MonoBehaviour {
 		}
 		else
 		{
-			Wheel_FL.motorTorque = EngineTorque / GearRatio[CurrentGear] * Input.GetAxis("Vertical");
-			Wheel_FR.motorTorque = EngineTorque / GearRatio[CurrentGear] * Input.GetAxis("Vertical");
+			Wheel_FL.motorTorque = EngineTorque / GearRatio[CurrentGear] * motorInput;//Input.GetAxis("Vertical");
+			Wheel_FR.motorTorque = EngineTorque / GearRatio[CurrentGear] * motorInput;//Input.GetAxis("Vertical");
 		}
 		
 		//Input.
