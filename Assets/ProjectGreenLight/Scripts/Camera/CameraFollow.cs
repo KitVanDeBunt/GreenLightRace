@@ -3,8 +3,9 @@ using System.Collections;
 
 public class CameraFollow : MonoBehaviour 
 {
-	public Transform target;
-	private Transform camera;
+    [SerializeField]
+	private Transform target_;
+	private Transform cam;
 
 	private float posX = 0f;
 	private float posY = 0f;
@@ -12,11 +13,20 @@ public class CameraFollow : MonoBehaviour
 	private float height = 2f;
 	private float distance = 6f;
 
-	void Start () 
-	{
-		camera = target;
+    public Transform target
+    {
+        set
+        {
+            target_ = value;
+            Init();
+        }
+    }
 
-		Vector3 a = camera.eulerAngles;
+	void Init () 
+	{
+        cam = target_;
+
+		Vector3 a = transform.eulerAngles;
 		posX = a.x;
 		posY = a.y;
 
@@ -28,17 +38,20 @@ public class CameraFollow : MonoBehaviour
 
 	void LateUpdate () 
 	{
-		float tA = target.eulerAngles.y;
-		float cA = camera.eulerAngles.y;
-		posX = Mathf.LerpAngle(cA, tA, 3f * Time.deltaTime);
+        if (target_ != null)
+        {
+            float tA = target_.eulerAngles.y;
+            float cA = cam.eulerAngles.y;
+            posX = Mathf.LerpAngle(cA, tA, 3f * Time.deltaTime);
 
-		Quaternion rot = Quaternion.Euler(posX, posY, 0);
-		Vector3 targetMod = new Vector3 (0, height, 0);
+            Quaternion rot = Quaternion.Euler(posX, posY, 0);
+            Vector3 targetMod = new Vector3(0, height, 0);
 
-		Vector3 pos = target.position - (rot * Vector3.forward * (distance) + targetMod);
-		//Vector3 pos2 = target.position - (rot * Vector3.forward * (0.1) + targetMod);
+            Vector3 pos = target_.position - (rot * Vector3.forward * (distance) + targetMod);
+            //Vector3 pos2 = target.position - (rot * Vector3.forward * (0.1) + targetMod);
 
-		camera.rotation = rot;
-		camera.position = pos;
+            cam.rotation = rot;
+            cam.position = pos;
+        }
 	}
 }

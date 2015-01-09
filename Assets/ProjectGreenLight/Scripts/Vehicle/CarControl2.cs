@@ -1,28 +1,51 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class CarControl2 : MonoBehaviour {
+public class CarControl2 : MonoBehaviour
+{
 
-	public WheelCollider Wheel_FL;
-	public WheelCollider Wheel_FR;
-	public WheelCollider Wheel_RL;
-	public WheelCollider Wheel_RR;
+    public float inputMotor = 0f;
+    public float inputSteer = 0f;
 
-	public float[] GearRatio;
-	public int CurrentGear = 0;
-	public float EngineTorque = 600f;
-	public float MaxEngineRPM = 3000f;
-	public float MinEngineRPM = 1000f;
-	public float SteerAngle = 10f;
-	public Transform COM;
-	public float Speed = 0f;
-	public float maxSpeed = 150f;
-	public AudioSource skidAudio;
-	private float EngineRPM = 0f;
-	private float motorInput = 0f;
+    [SerializeField]
+	private WheelCollider Wheel_FL;
+    [SerializeField]
+    private WheelCollider Wheel_FR;
+    [SerializeField]
+    private WheelCollider Wheel_RL;
+    [SerializeField]
+    private WheelCollider Wheel_RR;
 
-	public float aiInputMoter = 0f;
-	public float aiInputSteer = 0f;
+    [SerializeField]
+    private float[] GearRatio;
+    [SerializeField]
+    private int CurrentGear = 0;
+    [SerializeField]
+    private float EngineTorque = 600f;
+    [SerializeField]
+    private float MaxEngineRPM = 3000f;
+    [SerializeField]
+    private float MinEngineRPM = 1000f;
+    [SerializeField]
+    private float SteerAngle = 10f;
+    [SerializeField]
+    private Transform COM;
+    [SerializeField]
+    private float speed_ = 0f;
+    [SerializeField]
+    private float maxSpeed = 150f;
+    [SerializeField]
+    private AudioSource skidAudio;
+    [SerializeField]
+    private float EngineRPM = 0f;
+
+    public float speed
+    {
+        get
+        {
+            return speed_;
+        }
+    }
 
 	void Start () 
 	{
@@ -31,14 +54,11 @@ public class CarControl2 : MonoBehaviour {
 
 	void Update () 
 	{
-		Speed = rigidbody.velocity.magnitude * 3.6f;
+		speed_ = rigidbody.velocity.magnitude * 3.6f;
 		rigidbody.drag = rigidbody.velocity.magnitude / 100f;
 		EngineRPM = (Wheel_FL.rpm + Wheel_FR.rpm) / 2f * GearRatio[CurrentGear];
 		
 		ShiftGears();
-		
-		//Input For MotorInput.
-		motorInput = aiInputMoter;//Input.GetAxis("Vertical");
 
 		//Audio
 		//audio.pitch = Mathf.Abs(EngineRPM / MaxEngineRPM) + 1.0;
@@ -47,28 +67,28 @@ public class CarControl2 : MonoBehaviour {
 		//}
 		
 		//Steering
-		Wheel_FL.steerAngle = SteerAngle * aiInputSteer;//Input.GetAxis("Horizontal");
-		Wheel_FR.steerAngle = SteerAngle * aiInputSteer;//Input.GetAxis("Horizontal");
+		Wheel_FL.steerAngle = SteerAngle * inputSteer;
+		Wheel_FR.steerAngle = SteerAngle * inputSteer;
 		
 		//Speed Limiter.
-		if(Speed > maxSpeed)
+        if (speed_ > maxSpeed)
 		{
 			Wheel_FL.motorTorque = 0f;
 			Wheel_FR.motorTorque = 0f;
 		}
 		else
 		{
-			Wheel_FL.motorTorque = EngineTorque / GearRatio[CurrentGear] * motorInput;//Input.GetAxis("Vertical");
-			Wheel_FR.motorTorque = EngineTorque / GearRatio[CurrentGear] * motorInput;//Input.GetAxis("Vertical");
+			Wheel_FL.motorTorque = EngineTorque / GearRatio[CurrentGear] * inputMotor;
+			Wheel_FR.motorTorque = EngineTorque / GearRatio[CurrentGear] * inputMotor;
 		}
 		
 		//Input.
-		if(motorInput <= 0f)
+		if(inputMotor <= 0f)
 		{
 			Wheel_RL.brakeTorque = 30f;
 			Wheel_RR.brakeTorque = 30f;
 		}
-		else if (motorInput >= 0f)
+		else if (inputMotor >= 0f)
 		{
 			Wheel_RL.brakeTorque = 0f;
 			Wheel_RR.brakeTorque = 0f;

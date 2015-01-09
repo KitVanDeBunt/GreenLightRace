@@ -27,22 +27,22 @@ public class CarAI : MonoBehaviour
 
 		float r = fixAngle(_lookRotation.eulerAngles.y - fixAngle(transform.rotation.eulerAngles.y));
 
-		if(control.Speed < nextNode.maxSpeed)
+		if(control.speed < nextNode.maxSpeed)
 		{
-			control.aiInputMoter = 1f;
+			control.inputMotor = 1f;
 		}
 		else
 		{
-			control.aiInputMoter = 0f;
+            control.inputMotor = 0f;
 		}
 
 		if(Mathf.Abs(r) < 10)
 		{
-			control.aiInputSteer = maxSteer(r / 15f);
+			control.inputSteer = maxSteer(r / 15f);
 		}
 		else
 		{
-			control.aiInputSteer = maxSteer(r);
+			control.inputSteer = maxSteer(r);
 		}
 
 		if(nextNode.checkDistance(new Vector2(transform.position.x, transform.position.z)))
