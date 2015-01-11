@@ -150,7 +150,23 @@ public class NetworkMain : MonoBehaviour
             RefreshHostList();
         }
     }
-
+    /*
+    private void pingList()
+    {
+        if (hostList != null)
+        {
+            for (int i = 0; i < hostList.Length; i++)
+            {
+                Ping newPing = new Ping(hostList[i].ip);
+                };
+            }
+        }
+        else
+        {
+            RefreshHostList();
+        }
+    }
+    */
     void OnMenuStateChange()
     {
         Console.Log("Menu state change");
