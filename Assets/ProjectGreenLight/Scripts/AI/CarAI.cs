@@ -12,7 +12,7 @@ public class CarAI : MonoBehaviour
 
 	void Start () 
 	{
-		worldpath = GameObject.Find("World").GetComponent<WorldPath>();
+		worldpath = Game.game.worldPath;
 		control = gameObject.GetComponent<CarControl2> ();
 
 		nextPoint = worldpath.getNextPointByID(nextPointID);

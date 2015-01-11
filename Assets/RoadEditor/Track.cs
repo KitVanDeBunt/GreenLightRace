@@ -242,13 +242,29 @@ public class Track : MonoBehaviour {
 	}
 	
 	void Draw (){
-		bool created = CreateBezieredPoints ();
+        float? bezierTimeStepSize = BezierStepSize( trackSettings.pointsPerUnityUnit);
+        bool created = CreateBezieredPoints(ref currentPositionsBeziered, ref currentRotations, ref currentWidths, true, bezierTimeStepSize.Value);
 		if (created) {
 			CreateMesh ();
 		}
 	}
 
-	bool CreateBezieredPoints (){
+    private float? BezierStepSize(float pointsPerUnityUnit){
+        if (pointsNew.Length < 2) {
+            Debug.LogError("need more then 1 point!!");
+            needMorePoints = true;
+            return null;
+        }
+        int bezierLevels = pointsNew.Length + 1 - 2;
+        float bezierApproximateLength = 0;
+        for (i = 0; i < bezierLevels; i++){
+            bezierApproximateLength += Vector3.Distance(pointsNew[i].position, pointsNew[i + 1].position);
+        }
+        float bezierSubsections = bezierApproximateLength * pointsPerUnityUnit;
+        return  (1f / bezierSubsections);
+    }
+
+    public bool CreateBezieredPoints(ref Vector3[] positions, ref Quaternion[] rotations, ref float[] widths, bool saveSourceForCheckUpdate, float bezierTStepSize){
 		if (pointsNew.Length < 2) {
 			Debug.LogError("need more then 1 point!!");
 			needMorePoints = true;
@@ -278,8 +294,7 @@ public class Track : MonoBehaviour {
 		for (i = 0; i < bezierLevels; i++) {
 			bezierApproximateLength += Vector3.Distance( tempListPos[i],tempListPos[i+1]);
 		}
-		float bezierSubsections = bezierApproximateLength * trackSettings.pointsPerUnityUnit;
-		float bezierTStepSize = 1f / bezierSubsections;
+		//float bezierSubsections = bezierApproximateLength * trackSettings.pointsPerUnityUnit;
 		
 		/*
 		Debug.Log ("bezierSubsections: "+bezierSubsections);
@@ -336,15 +351,18 @@ public class Track : MonoBehaviour {
 		rotationsBeziered.Add(Quaternion.Lerp(tempListRot[tempListRot.Count-2],tempListRot[tempListRot.Count-1],1));
 		widthBeziered.Add(Mathf.Lerp(tempListWidth[tempListWidth.Count-2],tempListWidth[tempListWidth.Count-1],1));
 
-		//bezied track data
-		currentPositionsBeziered = pointsBeziered.ToArray ();
-		currentRotations = rotationsBeziered.ToArray ();
-		currentWidths = widthBeziered.ToArray ();
-		
-		//save source for update checks
-		currentPositionsSource = tempListPos.ToArray ();
-		currentRottationsSource = tempListRot.ToArray ();
-		currentWidthsSource = tempListWidth.ToArray();
+        //bezied track data
+        positions = pointsBeziered.ToArray();
+        rotations = rotationsBeziered.ToArray();
+        widths = widthBeziered.ToArray();
+
+        if (saveSourceForCheckUpdate)
+        {
+            //save source for update checks
+            currentPositionsSource = tempListPos.ToArray();
+            currentRottationsSource = tempListRot.ToArray();
+            currentWidthsSource = tempListWidth.ToArray();
+        }
 		
 		//Debug.Log("pointsCurrent.length: "+pointsCurrent.Length);
 		//for (i = 0; i < pointsCurrent.Length; i++) {
