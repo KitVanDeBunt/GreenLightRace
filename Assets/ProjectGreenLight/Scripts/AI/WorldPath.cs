@@ -9,6 +9,10 @@ public class WorldPath : MonoBehaviour
     [SerializeField]
     private List<Node> pathList = new List<Node>();
 
+    [HideInInspector]
+    [SerializeField]
+    private Transform holder;
+
     [SerializeField]
     private Track[] trackParts;
 
@@ -78,7 +82,13 @@ public class WorldPath : MonoBehaviour
             }
             pathList.RemoveAt(i);
         }
-        
+
+        // if holder is null create holder
+        if (holder == null)
+        {
+            holder = new GameObject("Path Holder").transform;
+            holder.parent = transform;
+        }
 
         //add nodes if needed
         for (i = 0; i < pointList.Count; i++)
@@ -104,7 +114,7 @@ public class WorldPath : MonoBehaviour
                     }
                 }
             }
-            pathList[i].transform.parent = transform;
+            pathList[i].transform.parent = holder.transform;
 #if UNITY_EDITOR
             IconManager.SetIcon(pathList[i].gameObject, IconManager.LabelIcon.Purple);
 #endif

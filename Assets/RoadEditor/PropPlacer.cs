@@ -8,6 +8,10 @@ public class PropPlacer : MonoBehaviour
     [SerializeField]
     private List<Transform> pathList = new List<Transform>();
 
+    [HideInInspector]
+    [SerializeField]
+    private Transform holder;
+
     [SerializeField]
     private Track[] trackParts;
 
@@ -16,6 +20,12 @@ public class PropPlacer : MonoBehaviour
 
     [SerializeField]
     private GameObject prop;
+
+    [SerializeField]
+    private bool right = true;
+
+    [SerializeField]
+    private bool left = true;
 
     //private int pathLength;
 
@@ -82,6 +92,12 @@ public class PropPlacer : MonoBehaviour
             pathList.RemoveAt(i);
         }
         
+        // if holder is null create holder
+        if (holder == null)
+        {
+            holder = new GameObject("Prop Holder").transform;
+            holder.parent = transform;
+        }
 
         //add nodes if needed
         for (i = 0; i < pointList.Count; i++)
@@ -107,7 +123,7 @@ public class PropPlacer : MonoBehaviour
                     }
                 }
             }
-            pathList[i].transform.parent = transform;
+            pathList[i].transform.parent = holder.transform;
 #if UNITY_EDITOR
             //IconManager.SetIcon(pathList[i].gameObject, IconManager.LabelIcon.Purple);
 #endif
@@ -122,6 +138,7 @@ public class PropPlacer : MonoBehaviour
             pathList[i].rotation = rotationList[i];
             pathList[i].Translate(new Vector3(-(widthList[i] / 2), 0, 0), Space.Self);
             GameObject newProp = (GameObject)GameObject.Instantiate(prop, pathList[i].position, pathList[i].rotation);
+            newProp.isStatic = true;
             newProp.name = "paal";
             newProp.transform.parent = pathList[i];
             //pathList[i].maxLeft.Translate(new Vector3((widthList[i]/2), 0, 0), Space.Self);

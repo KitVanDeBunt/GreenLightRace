@@ -5,6 +5,10 @@ public class WheelAlignment2 : MonoBehaviour {
 
 	public WheelCollider CorrespondingCollider;
 	public GameObject SlipPrefab;
+
+    [SerializeField]
+    private float wheelDisplaysment;
+
 	private float RotationValue = 0f;
 
 	void Update () 
@@ -20,6 +24,7 @@ public class WheelAlignment2 : MonoBehaviour {
 		{
 			transform.position = ColliderCenterPoint - (CorrespondingCollider.transform.up * CorrespondingCollider.suspensionDistance);
 		}
+        transform.Translate(0f, 0f, wheelDisplaysment);
 		
 		transform.rotation = CorrespondingCollider.transform.rotation * Quaternion.Euler( 0, CorrespondingCollider.steerAngle + 90, RotationValue );
 		RotationValue += CorrespondingCollider.rpm * ( 360/60 ) * Time.deltaTime;
