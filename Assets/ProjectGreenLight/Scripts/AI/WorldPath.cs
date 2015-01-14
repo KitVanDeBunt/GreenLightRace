@@ -52,8 +52,8 @@ public class WorldPath : MonoBehaviour
         Debug.Log("trackParts L:" + trackParts.Length);
         for (i = 0; i < trackParts.Length; i++)
         {
-
-            bool createPointsSucses = trackParts[i].CreateBezieredPoints(ref tempPositions, ref tempRotatioins, ref tempWidth, false, bezierStepSize);
+            float? bezierTimeStepSize = trackParts[i].BezierStepSize(bezierStepSize);
+            bool createPointsSucses = trackParts[i].CreateBezieredPoints(ref tempPositions, ref tempRotatioins, ref tempWidth, false, bezierTimeStepSize.Value);
             if (createPointsSucses)
             {
                 float pointCount = tempPositions.Length;

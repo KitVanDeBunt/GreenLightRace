@@ -12,10 +12,10 @@ class Game : MonoBehaviour
     private static CarInfo currentCar;
     private static VehicleFollow cam_;
 	 
-    public static void SpawnPlayer(CarList carList, CarType carType, Transform SpawnPoint, VehicleFollow cam)
+    public static void SpawnPlayer(CarList carList,int carNum, CarType carType, Transform SpawnPoint, VehicleFollow cam)
     {
         cam_ = cam;
-        GameObject newCar = (GameObject)Network.Instantiate(carList.cars[0].gameObject, SpawnPoint.position, SpawnPoint.rotation, 0);
+        GameObject newCar = (GameObject)Network.Instantiate(carList.cars[carNum].gameObject, SpawnPoint.position, SpawnPoint.rotation, 0);
         playerList_.Add(newCar.GetComponent<CarInfo>());
         if(carType == CarType.self)
         {

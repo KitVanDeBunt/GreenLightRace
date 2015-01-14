@@ -5,7 +5,7 @@ public class AntiRollBar2 : MonoBehaviour {
 
 	public WheelCollider WheelL;
 	public WheelCollider WheelR;
-	public float AntiRoll = 5000f;
+	public float AntiRoll = 12000f;
 
 	void FixedUpdate () 
 	{

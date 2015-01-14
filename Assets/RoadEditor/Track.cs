@@ -249,7 +249,7 @@ public class Track : MonoBehaviour {
 		}
 	}
 
-    private float? BezierStepSize(float pointsPerUnityUnit){
+    public float? BezierStepSize(float pointsPerUnityUnit){
         if (pointsNew.Length < 2) {
             Debug.LogError("need more then 1 point!!");
             needMorePoints = true;

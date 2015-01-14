@@ -55,7 +55,7 @@ public class MusicShaderController : MonoBehaviour
 
 	void Start(){
 		manualControle = false;
-		currentGameTheme = new GameTheme(new Color(1,1,0),0.2f);
+        currentGameTheme = new GameTheme(new Color(1, 1, 0), 0.03f);
 		mColorR = currentGameTheme.color.r;
 		mColorG = currentGameTheme.color.g;
 		mColorB = currentGameTheme.color.b;
@@ -63,11 +63,11 @@ public class MusicShaderController : MonoBehaviour
 		oldGameTheme = currentGameTheme;
 		gameThemes = new GameTheme[5];
 		gameThemes[0] = currentGameTheme;
-		gameThemes[1] = new GameTheme(new Color(1,0		,1),0.1f);
-		gameThemes[2] = new GameTheme(new Color(1,1		,1),0.1f);
-		gameThemes[3] = new GameTheme(new Color(1,1		,0),0.2f);
-		gameThemes[4] = new GameTheme(new Color(0,1		,1),0.1f);
-		gameThemes[4] = new GameTheme(new Color(0,0.35f	,1),0.1f);
+        gameThemes[1] = new GameTheme(new Color(1, 0, 1), 0.03f);
+        gameThemes[2] = new GameTheme(new Color(1, 1, 1), 0.03f);
+        gameThemes[3] = new GameTheme(new Color(1, 1, 0), 0.03f);
+        gameThemes[4] = new GameTheme(new Color(0, 1, 1), 0.03f);
+        gameThemes[4] = new GameTheme(new Color(0, 0.35f, 1), 0.03f);
 		light.intensity = lightI;
 		
 		StartCoroutine(ChangeTheme());

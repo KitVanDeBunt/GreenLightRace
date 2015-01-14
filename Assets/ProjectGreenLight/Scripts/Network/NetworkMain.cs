@@ -212,8 +212,8 @@ public class NetworkMain : MonoBehaviour
     {
         Console.Log("Server initialized and ready");
         nsm.menuState = NetworkMenuState.server2;
-        Game.SpawnPlayer(carList, CarType.self, spawnServer,cam);
-        Game.SpawnPlayer(carList, CarType.aI, spawnAI, cam);
+        Game.SpawnPlayer(carList, 1, CarType.self, spawnServer,cam);
+        Game.SpawnPlayer(carList, 0, CarType.aI, spawnAI, cam);
     }
 
     //Called on the client when you have successfully connected to a server.
@@ -221,7 +221,7 @@ public class NetworkMain : MonoBehaviour
     {
         Console.Log("Connected to server");
         nsm.menuState = NetworkMenuState.client2;
-        Game.SpawnPlayer(carList, CarType.self, spawnServer, cam);
+        Game.SpawnPlayer(carList, 1, CarType.self, spawnServer, cam);
     }
 
     //Called on client during disconnection from server, but also on the server when the connection has disconnected.
