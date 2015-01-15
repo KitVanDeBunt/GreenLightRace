@@ -5,6 +5,10 @@ class Game : MonoBehaviour
 {
 	private static Game game_;
 	private static bool gameFound_;
+
+    private static NetworkMain netMain_;
+    private static bool netMainFound_;
+
 	[SerializeField]
 	private WorldPath worldPath_;
 
@@ -32,18 +36,32 @@ class Game : MonoBehaviour
             newCar.gameObject.AddComponent<CarAI>();
         }
     }
-    
-	public static Game game
-	{
-		get
-		{
-			if(!gameFound_){
-				game_ = GameObject.Find("Game").GetComponent<Game>();
-				gameFound_ = true;
-			}
-			return game_;
-		}
-	}
+
+    public static Game game
+    {
+        get
+        {
+            if (!gameFound_)
+            {
+                game_ = GameObject.Find("Game").GetComponent<Game>();
+                gameFound_ = true;
+            }
+            return game_;
+        }
+    }
+
+    public static NetworkMain netMain
+    {
+        get
+        {
+            if (!netMainFound_)
+            {
+                netMain_ = game.GetComponentInChildren<NetworkMain>();
+                netMainFound_ = true;
+            }
+            return netMain_;
+        }
+    }
 
     private int NextCarID()
     {

@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections;
 
-public class NetworkMain : MonoBehaviour
+public class NetworkMain : LoaderObject
 {
     //game
     [SerializeField]
@@ -26,7 +26,7 @@ public class NetworkMain : MonoBehaviour
     private const float buttonY = 10F;
     private const float buttonDist = 40F;
     private int buttonNum = 0;
-    private string gameName = "Room Name";
+    //private string gameName = "Room Name";
     private string DisplayText;
     private Console console;
 
@@ -44,6 +44,129 @@ public class NetworkMain : MonoBehaviour
     }
 
     void OnGUI()
+    {
+        buttonNum = 0;
+        if (GUI.Button(ButtonRect(buttonY, buttonDist, buttonNum), "Console"))
+        {
+            console.enabled = !console.enabled;
+        };
+    }
+
+    public void NetEvent(string eventName,string eventString)
+    {
+        switch (nsm.menuState)
+        {
+            case NetworkMenuState.server:
+                // server host menu
+                if (eventName == Events.GUI_START_SERVER)
+                {
+                    netInstance = new Server(nsm, eventString);
+                    netInstance.Init();
+                    nsm.netType = NetworkType.server;
+                };
+                break;
+            default:
+                Debug.LogError("NetEvent state error");
+                break;
+        }
+    }
+
+    public void NetEvent(string eventName)
+    {
+        switch (nsm.menuState)
+        {
+            case NetworkMenuState.newInstance:
+                // start menu
+                if (eventName == Events.GUI_SERVER_MENU)
+                {
+                    nsm.menuState = NetworkMenuState.server;
+                };
+                if (eventName == Events.GUI_CLIENT_MENU)
+                {
+                    netInstance = new Client(nsm);
+                    netInstance.Init();
+                    nsm.menuState = NetworkMenuState.client1;
+                    nsm.netType = NetworkType.client;
+                };
+                break;
+            case NetworkMenuState.server:
+                // server host menu
+                if (eventName == Events.GUI_BACK)
+                {
+                    nsm.menuState = NetworkMenuState.newInstance;
+                };
+                break;
+
+            case NetworkMenuState.server2:
+                // menu server
+                if (GUI.Button(ButtonRect(buttonY, buttonDist, buttonNum), "Close Server"))
+                {
+                    netInstance.Close();
+                }
+                break;
+
+            case NetworkMenuState.client1:
+                // menu client
+                if (eventName == Events.GUI_BACK)
+                {
+                    nsm.menuState = NetworkMenuState.newInstance;
+                };
+                if (eventName == Events.GUI_REFRESH)
+                {
+                    RefreshHostList();
+                };
+                DrawHostList();
+                break;
+            case NetworkMenuState.client2:
+                if (eventName == Events.GUI_CLOSE)
+                {
+                    nsm.menuState = NetworkMenuState.client1;
+                    netInstance.Close();
+                };
+                break;
+            default:
+                Debug.LogError("NetEvent state error");
+                break;
+        }
+    }
+
+    public void RefreshHostList()
+    {
+        if (!refreshing)
+        {
+            Console.Log("Refresh Host List");
+            MasterServer.RequestHostList(NetSettings.GAME_TYPE);
+            refreshing = true;
+        }
+    }
+
+    private void DrawHostList()
+    {
+        if (hostList != null)
+        {
+            for (int i = 0; i < hostList.Length; i++)
+            {
+                if (GUI.Button(ButtonRect(buttonY, buttonDist, buttonNum), ("JOIN: " + hostList[i].gameName)))
+                {
+                    Network.Connect(hostList[i]);
+                };
+            }
+            if (hostList.Length < 1)
+            {
+                GUI.Label(new Rect(400, 10, 150, 20), "no host found");
+            }
+            else
+            {
+                GUI.Label(new Rect(400, 10, 150, 20), hostList.Length + "host(s) found");
+            }
+        }
+        else
+        {
+            RefreshHostList();
+        }
+    }
+
+    /*void OnGUI()
     {
         buttonNum = 0;
         if (GUI.Button(ButtonRect(buttonY, buttonDist, buttonNum), "Console"))
@@ -83,10 +206,10 @@ public class NetworkMain : MonoBehaviour
 
             case NetworkMenuState.server2:
                 // menu server
-                /*if (GUI.Button(ButtonRect(buttonY, buttonDist, buttonNum), "Refresh"))
-                {
-                    RefreshHostList();
-                }*/
+                //if (GUI.Button(ButtonRect(buttonY, buttonDist, buttonNum), "Refresh"))
+               // {
+               //     RefreshHostList();
+                //}
                 if (GUI.Button(ButtonRect(buttonY, buttonDist, buttonNum), "Close Server"))
                 {
                     netInstance.Close();
@@ -113,43 +236,8 @@ public class NetworkMain : MonoBehaviour
                 };
                 break;
         }
-    }
+    }*/
 
-    private void RefreshHostList()
-    {
-        if (!refreshing)
-        {
-            Console.Log("Refresh Host List");
-            MasterServer.RequestHostList(NetSettings.GAME_TYPE);
-            refreshing = true;
-        }
-    }
-
-    private void DrawHostList()
-    {
-        if (hostList != null)
-        {
-            for (int i = 0; i < hostList.Length; i++ )
-            {
-                if (GUI.Button(ButtonRect(buttonY, buttonDist, buttonNum), ("JOIN: "+hostList[i].gameName)))
-                {
-                    Network.Connect(hostList[i]);
-                };
-            }
-            if (hostList.Length < 1)
-            {
-                GUI.Label(new Rect(400, 10, 150, 20), "no host found");
-            }
-            else
-            {
-                GUI.Label(new Rect(400, 10, 150, 20), hostList.Length + "host(s) found");
-            }
-        }
-        else
-        {
-            RefreshHostList();
-        }
-    }
     /*
     private void pingList()
     {
@@ -198,7 +286,7 @@ public class NetworkMain : MonoBehaviour
         }
         else if (msEvent == MasterServerEvent.RegistrationFailedNoServer)
         {
-            Console.Log("MerServerEvent.RegistrationFailedNoServer");
+            Console.Log("MasterServerEvent.RegistrationFailedNoServer");
         }
         else if (msEvent == MasterServerEvent.RegistrationSucceeded)
         {

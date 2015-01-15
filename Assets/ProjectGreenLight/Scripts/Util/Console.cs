@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-class Console : MonoBehaviour
+class Console : LoaderObject
 {
     private static string logText = "";
 

@@ -1,6 +1,6 @@
 ﻿
 class NetSettings{
-    public const int MAX_PLAYERS = 4;
+    public const int MAX_PLAYERS = 5;
     public const int SERVER_PORT = 4000;
 
     public const string MASTER_SERVER_IP = "188.166.41.249";
