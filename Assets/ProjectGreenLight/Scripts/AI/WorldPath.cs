@@ -46,6 +46,7 @@ public class WorldPath : MonoBehaviour
         Vector3[] tempPositions = new Vector3[1] { new Vector3(0, 0, 0) };
         Quaternion[] tempRotatioins = new Quaternion[1] { new Quaternion(0, 0, 0, 0) };
         float[] tempWidth = new float[1] { 0 };
+        float[] tempHeight = new float[1] { 0 };
 
         //List<Node> newNodes = new List<Node>();
 
@@ -53,7 +54,7 @@ public class WorldPath : MonoBehaviour
         for (i = 0; i < trackParts.Length; i++)
         {
             float? bezierTimeStepSize = trackParts[i].BezierStepSize(bezierStepSize);
-            bool createPointsSucses = trackParts[i].CreateBezieredPoints(ref tempPositions, ref tempRotatioins, ref tempWidth, false, bezierTimeStepSize.Value);
+            bool createPointsSucses = trackParts[i].CreateBezieredPoints(ref tempPositions, ref tempRotatioins, ref tempWidth, ref tempHeight, false, bezierTimeStepSize.Value);
             if (createPointsSucses)
             {
                 float pointCount = tempPositions.Length;

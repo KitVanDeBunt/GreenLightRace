@@ -14,9 +14,9 @@ class Server : NetInstance
         Debug.Log("\nServer Start");
 
         bool useNat = !Network.HavePublicAddress();
-        Network.InitializeServer(NetSettings.MAX_PLAYERS, NetSettings.SERVER_PORT, useNat);
+        Network.InitializeServer(Settings.Net.MAX_PLAYERS, Settings.Net.SERVER_PORT, useNat);
 
-        MasterServer.RegisterHost(NetSettings.GAME_TYPE, gameName_, "hello testing");
+        MasterServer.RegisterHost(Settings.Net.GAME_TYPE, gameName_, "hello testing");
         Debug.Log("\nMasterServer.ipAddress :" + MasterServer.ipAddress);
         Debug.Log("\nMasterServer.port :" + MasterServer.port);
     }

@@ -4,7 +4,8 @@ using UnityEngine;
 public class TrackPoint : MonoBehaviour{
 
 	//trackData
-	public int width = 25;
+    public int width = 25;
+    public int height = 5;
 
 	//bind point
 	public Transform bindPoint;
@@ -20,14 +21,18 @@ public class TrackPoint : MonoBehaviour{
 	public Quaternion checkRotation;
 	[SerializeField]
 	[HideInInspector]
-	public int checkWidth;
+    public int checkWidth;
+    [SerializeField]
+    [HideInInspector]
+    public int checkHeight;
 
 	private bool updatePoint;
 
 	private void Start(){
 		checkPosition = transform.position;
 		checkRotation = transform.rotation;
-		checkWidth = width;
+        checkWidth = width;
+        checkHeight = height;
 	}
 	
 	// uncomment if u want to edit in play mode
@@ -66,6 +71,13 @@ public class TrackPoint : MonoBehaviour{
 					updatePoint = true;
 				}
 			}
+
+            if (!updatePoint){
+                if (height != checkHeight)
+                {
+                    updatePoint = true;
+                }
+            }
 			//update points
 			if(updatePoint){
 				UpdateCheckPoint(this,true);
@@ -78,7 +90,8 @@ public class TrackPoint : MonoBehaviour{
 
 		checkPosition = pointToClone.transform.position;
 		checkRotation = pointToClone.transform.localRotation;
-		checkWidth = pointToClone.width;
+        checkWidth = pointToClone.width;
+        checkHeight = pointToClone.height;
 		if (!selfCall) {
 			Quaternion rot = pointToClone.transform.rotation;
 			rot.x = -pointToClone.transform.rotation.x;
@@ -92,6 +105,7 @@ public class TrackPoint : MonoBehaviour{
 		
 		transform.position = checkPosition;
 		transform.rotation = checkRotation;
-		width = checkWidth;
+        width = checkWidth;
+        height = checkHeight;
 	}
 }

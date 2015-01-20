@@ -6,6 +6,12 @@ using System.Collections;
 public class VehicleFollow : MonoBehaviour
 {
     public Transform target;
+    [SerializeField]
+    private bool fixAngle;
+
+    [SerializeField]
+    private bool prevButtonRight = false;
+
     private Transform myTransform;
 
     [SerializeField]
@@ -14,9 +20,6 @@ public class VehicleFollow : MonoBehaviour
     private float targetRight = 0.0f;
     [SerializeField]
     private float distance = 6.0f;
-
-    [SerializeField]
-    private bool prevButtonRight = false;
 
     [SerializeField]
     private float maxDistance = 20;
@@ -71,11 +74,11 @@ public class VehicleFollow : MonoBehaviour
         if (!target)
             return;
 
-        if (Input.GetMouseButtonUp(0)) prevButtonRight = false;
-        if (Input.GetMouseButtonUp(1)) prevButtonRight = true;
+        //if (Input.GetMouseButtonUp(0)) prevButtonRight = false;
+        //if (Input.GetMouseButtonUp(1)) prevButtonRight = true;
 
         // If either mouse buttons are down, let them govern camera position
-        if (Input.GetMouseButton(0) || Input.GetMouseButton(1))
+        if (Input.GetMouseButton(0))
         {
             x += Input.GetAxis("Mouse X") * xSpeed * 0.02f;
             y -= Input.GetAxis("Mouse Y") * ySpeed * 0.02f;
@@ -95,28 +98,35 @@ public class VehicleFollow : MonoBehaviour
         y = ClampAngle(y, yMinLimit, yMaxLimit);
 
         Quaternion rotation = Quaternion.Euler(y, x, 0);
+        if (fixAngle && prevButtonRight)
+        {
+            //traget rotation
+            rotation = Quaternion.Lerp(rotation, target.rotation, 0.5f);
+            //current rotation
+            rotation = Quaternion.Lerp(myTransform.rotation, rotation, rotationDampening * Time.deltaTime);
+        }
         Vector3 targetMod = new Vector3(0, -targetHeight, 0) - (rotation * Vector3.right * targetRight);
         int layerMask = 1 << 8;
         layerMask = ~layerMask;
         Vector3 position = target.position - (rotation * Vector3.forward * (distance - distmod) + targetMod);
         Vector3 position2 = target.position - (rotation * Vector3.forward * (0.1f) + targetMod);
-        /* 
+        //////////////
          // Check to see if we have a collision
          if ((Physics.CheckSphere (position, 0.4f, layerMask)||Physics.Linecast (position2, position, layerMask))&&(distmod<distance))
          {
-            position = target.position - (rotation * Vector3.forward * (distance-distmod) + Vector3(0,-targetHeight,0));
+            position = target.position - (rotation * Vector3.forward * (distance-distmod) + new Vector3(0,-targetHeight,0));
             distmod=Mathf.Lerp(distmod,distance,Time.deltaTime*2);
          }
          else
          {
-            FIXME_VAR_TYPE newdistmod=Mathf.Lerp(distmod,0.0f,Time.deltaTime*2);
+            float newdistmod=Mathf.Lerp(distmod,0.0f,Time.deltaTime*2);
             if (newdistmod<0.1f) newdistmod=0.0f;
-            if (!Physics.CheckSphere (target.position - (rotation * Vector3.forward * (distance-newdistmod) + targetMod), .4, layerMask)&&!Physics.Linecast (position2, target.position - (rotation * Vector3.forward * (distance-newdistmod) + targetMod), layerMask)&&(distmod!=0.0f)){
+            if (!Physics.CheckSphere (target.position - (rotation * Vector3.forward * (distance-newdistmod) + targetMod), 0.4f, layerMask)&&!Physics.Linecast (position2, target.position - (rotation * Vector3.forward * (distance-newdistmod) + targetMod), layerMask)&&(distmod!=0.0f)){
                distmod=newdistmod;
             }
          }
-       */
-        //position = Vector3.Slerp(transform.position, position, Time.deltaTime * 100);   
+       ////////////
+        position = Vector3.Slerp(transform.position, position, Time.deltaTime * 100);   
 
         myTransform.rotation = rotation;
         myTransform.position = position;

@@ -21,9 +21,10 @@ public class NetworkMain : LoaderObject
     private NetInstance netInstance;
     private HostData[] hostList;
     private bool refreshing = false;
+    private string gameName = "temp name";
 
     //ui
-    private const float buttonY = 10F;
+    private const float buttonY = 90F;
     private const float buttonDist = 40F;
     private int buttonNum = 0;
     //private string gameName = "Room Name";
@@ -46,6 +47,12 @@ public class NetworkMain : LoaderObject
     void OnGUI()
     {
         buttonNum = 0;
+        OnGuiDrawConsole();
+        OnGuiDrawNetMenu();
+    }
+
+    void OnGuiDrawConsole()
+    {
         if (GUI.Button(ButtonRect(buttonY, buttonDist, buttonNum), "Console"))
         {
             console.enabled = !console.enabled;
@@ -135,7 +142,7 @@ public class NetworkMain : LoaderObject
         if (!refreshing)
         {
             Console.Log("Refresh Host List");
-            MasterServer.RequestHostList(NetSettings.GAME_TYPE);
+            MasterServer.RequestHostList(Settings.Net.GAME_TYPE);
             refreshing = true;
         }
     }
@@ -166,13 +173,9 @@ public class NetworkMain : LoaderObject
         }
     }
 
-    /*void OnGUI()
+
+    void OnGuiDrawNetMenu()
     {
-        buttonNum = 0;
-        if (GUI.Button(ButtonRect(buttonY, buttonDist, buttonNum), "Console"))
-        {
-            console.enabled = !console.enabled;
-        };
         switch (nsm.menuState)
         {
             case NetworkMenuState.newInstance:
@@ -236,7 +239,9 @@ public class NetworkMain : LoaderObject
                 };
                 break;
         }
-    }*/
+    }
+
+
 
     /*
     private void pingList()

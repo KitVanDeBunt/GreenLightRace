@@ -7,6 +7,13 @@ enum CarType
     aI
 }
 
+enum CarID
+{
+    joppeHotrod,
+    maartenNucleoid,
+    thomasCar
+}
+
 public class CarInfo : MonoBehaviour
 {
     public Transform follow;
