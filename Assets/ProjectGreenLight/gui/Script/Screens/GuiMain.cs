@@ -66,18 +66,8 @@ public class GuiMain : GuiScreen
 		}
 	}
 
-	public void click(int id)
-	{
-		switch(id)
-		{
-		case 0: manager.switchGui("multiplayer"); break;
-		case 1: manager.switchGui("options"); break;
-		case 2: manager.switchGui("credits"); break;
-		}
-	}
-
-	public override string getGuiName()
-	{
-		return "main";
-	}
+    public override GuiScreenId GetGuiId()
+    {
+        return GuiScreenId.Main;
+    }
 }

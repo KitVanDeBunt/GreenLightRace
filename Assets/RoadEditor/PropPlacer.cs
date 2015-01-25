@@ -18,15 +18,16 @@ public class PropPlacer : MonoBehaviour
     [SerializeField]
     private float bezierStepSize = 1;
 
+    
     [SerializeField]
     private GameObject prop;
-
+    /*
     [SerializeField]
     private bool right = true;
 
     [SerializeField]
     private bool left = true;
-
+    */
     //private int pathLength;
 
     void Start()

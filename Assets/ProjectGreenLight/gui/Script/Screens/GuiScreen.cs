@@ -13,16 +13,46 @@ public class GuiScreen : MonoBehaviour
 
 	public virtual void init()
 	{
+        //Debug.Log("[" + GetGuiId().ToString() + "] init");
 	}
 
 	public virtual void end()
 	{
+        //Debug.Log("[" + GetGuiId().ToString() + "] end");
 	}
 
-	public virtual string getGuiName()
+    void OnEnable()
+    {
+        EventManager.OnNetEvent += OnNetEvent;
+        //Debug.Log("[" + GetGuiId().ToString() + "] On enable");
+    }
+
+    void OnDisable()
+    {
+        EventManager.OnNetEvent -= OnNetEvent;
+        //Debug.Log("[" + GetGuiId().ToString() + "] On disable");
+    }
+
+    internal virtual void OnNetEvent(Events.Net message)
+    {
+
+    }
+
+    public virtual GuiScreenId GetGuiId()
 	{
-		return "null";
+        Debug.LogError("This function must be overritten");
+        return GuiScreenId.Error;
 	}
+
+    public virtual void switchGui(GuiScreen screen)
+    {
+        manager.switchGui(screen.GetGuiId());
+    }
+
+    public void switchGui(GuiScreenId id)
+    {
+        manager.switchGui(id);
+    }
 
 	public void playButtonClick()
 	{

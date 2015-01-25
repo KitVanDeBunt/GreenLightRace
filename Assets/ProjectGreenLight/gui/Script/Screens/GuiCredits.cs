@@ -14,11 +14,11 @@ public class GuiCredits : GuiScreen
 
 	public void back()
 	{
-		manager.switchGui("main");
+		manager.switchGui(GuiScreenId.Main);
 	}
-	
-	public override string getGuiName()
+
+    public override GuiScreenId GetGuiId()
 	{
-		return "credits";
+        return GuiScreenId.Credits;
 	}
 }

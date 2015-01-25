@@ -7,7 +7,7 @@ public class MusicShaderController : MonoBehaviour
 	private MusicShader musicShader;
 
 	[SerializeField]
-	private Light light;
+	private Light sunLight;
 	
 	private float  lightI;
 	private float mColorR = 1;
@@ -68,7 +68,7 @@ public class MusicShaderController : MonoBehaviour
         gameThemes[3] = new GameTheme(new Color(1, 1, 0), 0.03f);
         gameThemes[4] = new GameTheme(new Color(0, 1, 1), 0.03f);
         gameThemes[4] = new GameTheme(new Color(0, 0.35f, 1), 0.03f);
-		light.intensity = lightI;
+		sunLight.intensity = lightI;
 		
 		StartCoroutine(ChangeTheme());
 	}
@@ -86,7 +86,7 @@ public class MusicShaderController : MonoBehaviour
 			}
 		}
 		
-		light.intensity = lightI;
+		sunLight.intensity = lightI;
 		for(int j =0;j<musicShader.musicMaterials.Length;j++){
 			musicShader.musicMaterials[j].SetColor("_MColor", new Color(mColorR,mColorG,mColorB));
 		}

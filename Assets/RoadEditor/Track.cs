@@ -578,7 +578,7 @@ public class Track : MonoBehaviour {
 		float tempAferageWidth = 5;///////////// work in progress (height of wall)
 		float lengthPartSize = ((1f/trackSettings.pointsPerUnityUnit)/tempAferageWidth);
 		for(i = 0;i < (roadLength);i++){
-			float texWidthPos = ((i)%1);
+			//float texWidthPos = ((i)%1);
 			float texLengthPos = (i/1);
 			
 			float luv1 = (texLengthPos*lengthPartSize);
@@ -822,9 +822,9 @@ public class Track : MonoBehaviour {
 
 
         //set materials
-        meshRenderer.material = trackSettings.trackMaterial;
-        meshRendererWalls.material = trackSettings.TrackMaterialWalls;
-        meshRendererBottom.material = trackSettings.TrackMaterialBottom;
+        meshRenderer.sharedMaterial = trackSettings.trackMaterial;
+        meshRendererWalls.sharedMaterial = trackSettings.TrackMaterialWalls;
+        meshRendererBottom.sharedMaterial = trackSettings.TrackMaterialBottom;
 	}
 }
 

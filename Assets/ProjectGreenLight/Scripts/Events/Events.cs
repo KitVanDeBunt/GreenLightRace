@@ -1,11 +1,17 @@
-﻿
-class Events
+﻿namespace Events
 {
-    public const string GUI_BACK = "BACK";
-    public const string GUI_CLOSE = "CLOSE";
-    public const string GUI_REFRESH = "GUI_REFRESH";
-    public const string GUI_SERVER_MENU = "Server_Menu";
-    public const string GUI_CLIENT_MENU = "Client_Menu";
-    public const string GUI_START_SERVER = "START_SERVER";
-    public const string GUI_START_CLIENT = "START_CLIENT";
+    public enum GUI
+    {
+        BACK,
+        CLOSE,
+        REFRESH,
+        SERVER_MENU,
+        MENU_SERVERLIST,
+        START_SERVER,
+        START_CLIENT
+    }
+    public enum Net
+    {
+        NEW_PLAYER_LIST
+    }
 }

@@ -18,7 +18,8 @@ public class GuiServerlist : GuiScreen
 
     public override void init()
 	{
-        Game.netMain.RefreshHostList();
+        //Game.netMain.RefreshHostList();
+        EventManager.callOnGuiEvent(Events.GUI.REFRESH);
 	}
 
 	
@@ -27,17 +28,19 @@ public class GuiServerlist : GuiScreen
 		switch(id)
 		{
 		case 0: //refresh
-            Game.netMain.RefreshHostList();
+            //Game.netMain.RefreshHostList();
+            EventManager.callOnGuiEvent(Events.GUI.REFRESH);
             break;
 
 		case 1: //direct
-            manager.switchGui("direct"); 
-            ((GuiDirect)manager.getMenuByName("direct")).returnGui = 1;
+            manager.switchGui(GuiScreenId.Direct);
+            ((GuiDirect)manager.getMenuById(GuiScreenId.Direct)).returnGui = 1;
             break;
 
 		case 2: //back
-            Game.netMain.NetEvent(Events.GUI_BACK);
-            manager.switchGui("multiplayer"); 
+            //Game.netMain.NetEvent(Events.GUI_BACK);
+            EventManager.callOnGuiEvent(Events.GUI.BACK);
+            manager.switchGui(GuiScreenId.MultiPlayer); 
             break;
 
 		}
@@ -96,7 +99,7 @@ public class GuiServerlist : GuiScreen
     //Called on the client when you have successfully connected to a server.
     void OnConnectedToServer()
     {
-        manager.switchGui("lobbyclient"); 
+        manager.switchGui(GuiScreenId.LobbyClient); 
     }
 
     //Called on client during disconnection from server, but also on the server when the connection has disconnected.
@@ -135,9 +138,9 @@ public class GuiServerlist : GuiScreen
 	{
 		return null;
 	}
-	
-	public override string getGuiName()
-	{
-		return "serverlist";
-	}
+
+    public override GuiScreenId GetGuiId()
+    {
+        return GuiScreenId.ServerList;
+    }
 }

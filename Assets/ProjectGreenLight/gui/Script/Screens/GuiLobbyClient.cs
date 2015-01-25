@@ -4,8 +4,8 @@ using UnityEngine.UI;
 
 public class GuiLobbyClient : GuiLobbyBase
 {
-    public override string getGuiName()
+    public override GuiScreenId GetGuiId()
     {
-        return "lobbyclient";
+        return GuiScreenId.LobbyClient;
     }
 }

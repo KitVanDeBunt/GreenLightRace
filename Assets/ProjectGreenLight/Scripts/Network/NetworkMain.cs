@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class NetworkMain : LoaderObject
 {
@@ -22,6 +23,8 @@ public class NetworkMain : LoaderObject
     private HostData[] hostList;
     private bool refreshing = false;
     private string gameName = "temp name";
+    public List<NetworkPlayerNoir> playerList;
+
 
     //ui
     private const float buttonY = 90F;
@@ -31,24 +34,29 @@ public class NetworkMain : LoaderObject
     private string DisplayText;
     private Console console;
 
+
+
+    void OnEnable()
+    {
+        EventManager.OnGuiEvent += GuiEvent;
+    }
+
+    void OnDisable()
+    {
+        EventManager.OnGuiEvent -= GuiEvent;
+    }
+
     void Start()
     {
         nsm = new NetworkStateManager(this);
         console = gameObject.GetComponent<Console>();
     }
 
-    Rect ButtonRect(float posStart, float posDelta, int num)
-    {
-        buttonNum += 1;
-        float buttonYPos = posStart + (posDelta * (float)num);
-        return new Rect(10, buttonYPos, 350, 30);
-    }
-
     void OnGUI()
     {
         buttonNum = 0;
         OnGuiDrawConsole();
-        OnGuiDrawNetMenu();
+        //OnGuiDrawNetMenu();
     }
 
     void OnGuiDrawConsole()
@@ -59,81 +67,79 @@ public class NetworkMain : LoaderObject
         };
     }
 
-    public void NetEvent(string eventName,string eventString)
+    public void GuiEvent(Events.GUI message)
     {
-        switch (nsm.menuState)
+        bool messageSucses = false;
+        switch (message)
         {
-            case NetworkMenuState.server:
-                // server host menu
-                if (eventName == Events.GUI_START_SERVER)
+            case Events.GUI.SERVER_MENU:
+                if (nsm.menuState == NetworkState.newInstance)
                 {
-                    netInstance = new Server(nsm, eventString);
+                    nsm.menuState = NetworkState.server;
+                    messageSucses = true;
+                }
+                break;
+            case Events.GUI.START_SERVER:
+                if (nsm.menuState == NetworkState.server)
+                {
+                    netInstance = new Server(nsm, Settings.Player.roomname);
                     netInstance.Init();
-                    nsm.netType = NetworkType.server;
-                };
-                break;
-            default:
-                Debug.LogError("NetEvent state error");
-                break;
-        }
-    }
-
-    public void NetEvent(string eventName)
-    {
-        switch (nsm.menuState)
-        {
-            case NetworkMenuState.newInstance:
-                // start menu
-                if (eventName == Events.GUI_SERVER_MENU)
-                {
-                    nsm.menuState = NetworkMenuState.server;
-                };
-                if (eventName == Events.GUI_CLIENT_MENU)
-                {
-                    netInstance = new Client(nsm);
-                    netInstance.Init();
-                    nsm.menuState = NetworkMenuState.client1;
-                    nsm.netType = NetworkType.client;
-                };
-                break;
-            case NetworkMenuState.server:
-                // server host menu
-                if (eventName == Events.GUI_BACK)
-                {
-                    nsm.menuState = NetworkMenuState.newInstance;
-                };
-                break;
-
-            case NetworkMenuState.server2:
-                // menu server
-                if (GUI.Button(ButtonRect(buttonY, buttonDist, buttonNum), "Close Server"))
-                {
-                    netInstance.Close();
+                    messageSucses = true;
                 }
                 break;
 
-            case NetworkMenuState.client1:
-                // menu client
-                if (eventName == Events.GUI_BACK)
+            case Events.GUI.MENU_SERVERLIST:
+                if (nsm.menuState == NetworkState.newInstance)
                 {
-                    nsm.menuState = NetworkMenuState.newInstance;
-                };
-                if (eventName == Events.GUI_REFRESH)
+                    netInstance = new Client(nsm);
+                    netInstance.Init();
+                    nsm.menuState = NetworkState.client1;
+                    messageSucses = true;
+                }
+                break;
+
+            case Events.GUI.BACK:
+                if (nsm.menuState == NetworkState.server)
+                {
+                    nsm.menuState = NetworkState.newInstance;
+                    messageSucses = true;
+                }
+                if (nsm.menuState == NetworkState.server2)
+                {
+                    netInstance.Close();
+                    messageSucses = true;
+                }
+                if (nsm.menuState == NetworkState.client1)
+                {
+                    nsm.menuState = NetworkState.newInstance;
+                    messageSucses = true;
+                }
+                break;
+
+            case Events.GUI.REFRESH:
+                if (nsm.menuState == NetworkState.client1)
                 {
                     RefreshHostList();
-                };
-                DrawHostList();
+                    messageSucses = true;
+                }
                 break;
-            case NetworkMenuState.client2:
-                if (eventName == Events.GUI_CLOSE)
+
+            case Events.GUI.CLOSE:
+                if (nsm.menuState == NetworkState.client2)
                 {
-                    nsm.menuState = NetworkMenuState.client1;
+                    nsm.menuState = NetworkState.client1;
                     netInstance.Close();
-                };
+                    messageSucses = true;
+                }
                 break;
-            default:
-                Debug.LogError("NetEvent state error");
-                break;
+        }
+        if (!messageSucses)
+        {
+            Debug.LogError("NetEvent state error - current state: " + nsm.menuState + " - event: " + message.ToString());
+        }
+        else
+        {
+            Debug.Log("NetEvent - current state: " + nsm.menuState + " - event: " + message.ToString());
         }
     }
 
@@ -173,41 +179,46 @@ public class NetworkMain : LoaderObject
         }
     }
 
+    Rect ButtonRect(float posStart, float posDelta, int num)
+    {
+        buttonNum += 1;
+        float buttonYPos = posStart + (posDelta * (float)num);
+        return new Rect(10, buttonYPos, 350, 30);
+    }
 
     void OnGuiDrawNetMenu()
     {
         switch (nsm.menuState)
         {
-            case NetworkMenuState.newInstance:
+            case NetworkState.newInstance:
                 // start menu
                 if (GUI.Button(ButtonRect(buttonY, buttonDist, buttonNum), "Server"))
                 {
-                    nsm.menuState = NetworkMenuState.server;
+                    nsm.menuState = NetworkState.server;
                 };
                 if (GUI.Button(ButtonRect(buttonY, buttonDist, buttonNum), "Client"))
                 {
                     netInstance = new Client(nsm);
                     netInstance.Init();
-                    nsm.menuState = NetworkMenuState.client1;
-                    nsm.netType = NetworkType.client;
+                    nsm.menuState = NetworkState.client1;
                 };
                 break;
-            case NetworkMenuState.server:
+
+            case NetworkState.server:
                 // server host menu
                 gameName = GUI.TextField(ButtonRect(buttonY, buttonDist, buttonNum),gameName);
                 if (GUI.Button(ButtonRect(buttonY, buttonDist, buttonNum), "Back"))
                 {
-                    nsm.menuState = NetworkMenuState.newInstance;
+                    nsm.menuState = NetworkState.newInstance;
                 };
                 if (GUI.Button(ButtonRect(buttonY, buttonDist, buttonNum), "Host"))
                 {
                     netInstance = new Server(nsm, gameName);
                     netInstance.Init();
-                    nsm.netType = NetworkType.server;
                 };
                 break;
 
-            case NetworkMenuState.server2:
+            case NetworkState.server2:
                 // menu server
                 //if (GUI.Button(ButtonRect(buttonY, buttonDist, buttonNum), "Refresh"))
                // {
@@ -219,11 +230,11 @@ public class NetworkMain : LoaderObject
                 }
                 break;
 
-            case NetworkMenuState.client1:
+            case NetworkState.client1:
                 // menu client
                 if (GUI.Button(ButtonRect(buttonY, buttonDist, buttonNum), "Back"))
                 {
-                    nsm.menuState = NetworkMenuState.newInstance;
+                    nsm.menuState = NetworkState.newInstance;
                 };
                 if (GUI.Button(ButtonRect(buttonY, buttonDist, buttonNum), "Refresh"))
                 {
@@ -231,17 +242,16 @@ public class NetworkMain : LoaderObject
                 };
                 DrawHostList();
                 break;
-            case NetworkMenuState.client2:
+
+            case NetworkState.client2:
                 if (GUI.Button(ButtonRect(buttonY, buttonDist, buttonNum), "Close"))
                 {
-                    nsm.menuState = NetworkMenuState.client1;
+                    nsm.menuState = NetworkState.client1;
                     netInstance.Close();
                 };
                 break;
         }
     }
-
-
 
     /*
     private void pingList()
@@ -260,10 +270,6 @@ public class NetworkMain : LoaderObject
         }
     }
     */
-    void OnMenuStateChange()
-    {
-        Console.Log("Menu state change");
-    }
 
     //Called on clients or servers when there is a problem connecting to the master server.
     void OnFailedToConnectToMasterServer(NetworkConnectionError info)
@@ -304,17 +310,20 @@ public class NetworkMain : LoaderObject
     void OnServerInitialized()
     {
         Console.Log("Server initialized and ready");
-        nsm.menuState = NetworkMenuState.server2;
-        Game.SpawnPlayer(carList, 1, CarType.self, spawnServer,cam);
-        Game.SpawnPlayer(carList, 0, CarType.aI, spawnAI, cam);
+
+        nsm.menuState = NetworkState.server2;
+        //Game.SpawnPlayer(carList, 1, CarType.self, spawnServer,cam);
+        //Game.SpawnPlayer(carList, 0, CarType.aI, spawnAI, cam);
+
+        RPCAddPlayerToList(Network.player, Settings.Player.name, NetworkPlayerNoirState.joined);
     }
 
     //Called on the client when you have successfully connected to a server.
     void OnConnectedToServer()
     {
         Console.Log("Connected to server");
-        nsm.menuState = NetworkMenuState.client2;
-        Game.SpawnPlayer(carList, 1, CarType.self, spawnServer, cam);
+        nsm.menuState = NetworkState.client2;
+       // Game.SpawnPlayer(carList, 1, CarType.self, spawnServer, cam);
     }
 
     //Called on client during disconnection from server, but also on the server when the connection has disconnected.
@@ -354,6 +363,11 @@ public class NetworkMain : LoaderObject
     {
         playerCount++;
         Console.Log("Player " + playerCount + " connected from " + player.ipAddress + ":" + player.port);
+        for(int i = 0;i < Network.connections.Length;i++)
+        {
+            networkView.RPC("RPCAddPlayerToList", RPCMode.All, Network.connections[i], Settings.Player.name, NetworkPlayerNoirState.joined);
+        }
+        networkView.RPC("RPCAddPlayerToList", player, Network.player, Settings.Player.name, NetworkPlayerNoirState.joined);
     }
 
     //Called on the server whenever a player is disconnected from the server.
@@ -362,6 +376,42 @@ public class NetworkMain : LoaderObject
         Console.Log("Clean up after player " + player);
         Network.RemoveRPCs(player);
         Network.DestroyPlayerObjects(player);
+
+        networkView.RPC("RPCRemovePlayerFromList", RPCMode.All, player);
+    }
+
+    [RPC]
+    void RPCAddPlayerToList(NetworkPlayer player, string name, NetworkPlayerNoirState state)
+    {
+        if (playerList == null)
+        {
+            playerList = new List<NetworkPlayerNoir>();
+        }
+        bool playerNotInList = true;
+        for (int i = 0; i < playerList.Count; i++)
+        {
+            if (playerList[i].netPlayer == player)
+            {
+                playerNotInList = false;
+                break;
+            }
+        }
+        if (playerNotInList)
+        {
+            NetworkPlayerNoir newPlayer = new NetworkPlayerNoir(name, state, player);
+            playerList.Add(newPlayer);
+            EventManager.callOnNetEvent(Events.Net.NEW_PLAYER_LIST);
+        }
+    }
+
+    [RPC]
+    void RPCRemovePlayerFromList(NetworkPlayer player)
+    {
+        for (int i = 0; i < playerList.Count; i++)
+        {
+            playerList.Remove(playerList[i]);
+        }
+        EventManager.callOnNetEvent(Events.Net.NEW_PLAYER_LIST);
     }
 
     //Used to customize synchronization of variables in a script watched by a network view.

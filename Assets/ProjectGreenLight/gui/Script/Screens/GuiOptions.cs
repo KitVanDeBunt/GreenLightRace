@@ -1,27 +1,25 @@
-﻿using UnityEngine;
-using System.Collections;
-using UnityEngine.UI;
+﻿using UnityEngine.UI;
 
 public class GuiOptions : GuiScreen 
 {
-	void Start () 
+    [UnityEngine.SerializeField]
+    private InputField playerNameInput;
+    [UnityEngine.SerializeField]
+    private Text playerNamePlaceholder;
+
+    public override void init() 
 	{
+        playerNamePlaceholder.text = Settings.Player.name; 
 	}
-	
-	void Update () 
-	{
-	}
-	
-	public void click(int id)
-	{
-		switch(id)
-		{
-		case 0: manager.switchGui("main"); break;
-		}
-	}
-	
-	public override string getGuiName()
-	{
-		return "options";
-	}
+
+    //called in scene
+    public void OnPlayerNameTextChange()
+    {
+        Settings.Player.name = playerNameInput.text;
+    }
+
+    public override GuiScreenId GetGuiId()
+    {
+        return GuiScreenId.Options;
+    }
 }

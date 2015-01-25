@@ -2,8 +2,7 @@
 using System.Collections;
 
 public class LoaderObject : MonoBehaviour {
-    [SerializeField]
-    private string name = "loaderObject";
+    public string objectName = "loaderObject";
 
     void Awake(){
         DontDestroyOnLoad(gameObject);   

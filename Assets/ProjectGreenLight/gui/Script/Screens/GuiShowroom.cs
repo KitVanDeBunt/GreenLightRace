@@ -34,12 +34,12 @@ public class GuiShowroom : GuiScreen
 		{
 		case 0: manager.showroomManager.switchCar(-1); carText.text = manager.showroomManager.getCarName(); break;
 		case 1: manager.showroomManager.switchCar(1); carText.text = manager.showroomManager.getCarName(); break;
-		case 2: manager.switchGui("main"); break;
+		case 2: manager.switchGui(GuiScreenId.Main); break;
 		}
 	}
-	
-	public override string getGuiName()
-	{
-		return "showroom";
-	}
+
+    public override GuiScreenId GetGuiId()
+    {
+        return GuiScreenId.ShowRoom;
+    }
 }

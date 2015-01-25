@@ -50,7 +50,7 @@ class Game : MonoBehaviour
         }
     }
 
-    public static NetworkMain netMain
+    private static NetworkMain netMain
     {
         get
         {
@@ -63,6 +63,14 @@ class Game : MonoBehaviour
         }
     }
 
+    public static List<NetworkPlayerNoir> netPlayerList
+    {
+        get
+        {
+            return netMain.playerList;
+        }
+    }
+    
     private int NextCarID()
     {
         int nextNum = 0;

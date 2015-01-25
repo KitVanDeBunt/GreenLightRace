@@ -18,32 +18,31 @@ public class GuiHost : GuiScreen
 	{
 		switch(id)
 		{
-		case 0: startServer(field.text); break;
-		case 1: manager.switchGui("multiplayer"); break;
+		case 0: 
+            startServer(field.text); 
+            break;
+
+        case 1: 
+            manager.switchGui(GuiScreenId.MultiPlayer); 
+            break;
 		}
 	}
 
 	public void startServer(string roomName)
 	{
-        Game.netMain.NetEvent(Events.GUI_START_SERVER, roomName);
-		Debug.Log(roomName);
+        Settings.Player.roomname = roomName;
+        EventManager.callOnGuiEvent(Events.GUI.START_SERVER);
+		//Debug.Log("server started - name:" + roomName);
 	}
-	
-	public override string getGuiName()
-	{
-		return "host";
-	}
+
+    public override GuiScreenId GetGuiId()
+    {
+        return GuiScreenId.Host;
+    }
 
     //Called on the server whenever a Network.InitializeServer was invoked and has completed.
     void OnServerInitialized()
     {
-        manager.switchGui("lobbyserver"); 
+        manager.switchGui(GuiScreenId.LobbyServer); 
     }
-
-    //Called on the client when you have successfully connected to a server.
-    void OnConnectedToServer()
-    {
-    }
-
-    
 }

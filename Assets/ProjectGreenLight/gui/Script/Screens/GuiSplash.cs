@@ -69,12 +69,12 @@ public class GuiSplash : GuiScreen
 
 		if(time > 8f)
 		{
-			manager.switchGui("main");
+			manager.switchGui(GuiScreenId.Main);
 		}
 	}
-	
-	public override string getGuiName()
-	{
-		return "splash";
-	}
+
+    public override GuiScreenId GetGuiId()
+    {
+        return GuiScreenId.Splash;
+    }
 }

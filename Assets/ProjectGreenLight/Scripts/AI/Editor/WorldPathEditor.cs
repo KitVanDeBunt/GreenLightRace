@@ -6,7 +6,7 @@ using UnityEditor;
 public class WorldPathEditor : Editor 
 {
 	private Object myTarget;
-	private bool autoUpdate = false;
+	//private bool autoUpdate = false;
 	
 	public override void OnInspectorGUI()
 	{

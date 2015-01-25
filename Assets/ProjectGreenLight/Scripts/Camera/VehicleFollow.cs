@@ -42,19 +42,20 @@ public class VehicleFollow : MonoBehaviour
     [SerializeField]
     private float rotationDampening = 3.0f;
 
-    [SerializeField]
-    private float theta2 = 0.5f;
+    //[SerializeField]
+    //private float theta2 = 0.5f;
 
     private float x = 0.0f;
     private float y = 0.0f;
 
+    /*
     private Vector3 fwd = new Vector3();
     private Vector3 rightVector = new Vector3();
     private Vector3 upVector = new Vector3();
     private Vector3 movingVector = new Vector3();
     private Vector3 collisionVector = new Vector3();
     private bool isColliding = false;
-
+    */
     private float distmod = 0.0f;
 
     void Start()

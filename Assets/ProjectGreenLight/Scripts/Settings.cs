@@ -17,6 +17,7 @@ namespace Settings
     class Player
     {
         public static string name = "Player 1";
+        public static string roomname = "Noir Game";
         public static CarID carID = CarID.thomasCar;
     }
 }

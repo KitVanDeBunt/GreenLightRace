@@ -1,6 +1,4 @@
-﻿using UnityEngine;
-
-public enum NetworkMenuState
+﻿public enum NetworkState
 {
     newInstance,
     server,
@@ -10,31 +8,17 @@ public enum NetworkMenuState
     client3
 }
 
-public enum NetworkState
-{
-    connected,
-    notConnected
-}
-
-public enum NetworkType
-{
-    server,
-    client,
-    noNet
-}
 public class NetworkStateManager
 {
-    private NetworkMenuState menuState_ = NetworkMenuState.newInstance;
-    private NetworkState netState_ = NetworkState.notConnected;
-    private NetworkType netType_ = NetworkType.noNet;
-    private MonoBehaviour caller_;
+    private NetworkState menuState_ = NetworkState.newInstance;
+    private UnityEngine.MonoBehaviour caller_;
 
-    public NetworkStateManager(MonoBehaviour caller)
+    public NetworkStateManager(UnityEngine.MonoBehaviour caller)
     {
         caller_ = caller;
     }
 
-    public NetworkMenuState menuState
+    public NetworkState menuState
     {
         get
         {
@@ -42,32 +26,9 @@ public class NetworkStateManager
         }
         set
         {
-            caller_.BroadcastMessage("OnMenuStateChange");
+            //caller_.BroadcastMessage("OnNetStateChange");
             menuState_ = value;
-        }
-    }
-
-    public NetworkState netState
-    {
-        get
-        {
-            return netState_;
-        }
-        set
-        {
-            netState_ = value;
-        }
-    }
-
-    public NetworkType netType
-    {
-        set
-        {
-            netType_ = value;
-        }
-        get
-        {
-            return netType_;
+            Console.Log("Menu state change - current state: " + menuState_.ToString());
         }
     }
 }

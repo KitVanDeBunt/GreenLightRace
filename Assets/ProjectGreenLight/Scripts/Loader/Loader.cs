@@ -9,12 +9,15 @@ public class Loader : MonoBehaviour {
 
     void Start()
     {
-        for (int i = 0; i < loadObjects.Length; i++)
+        if (!loaded)
         {
-            GameObject newObject = (GameObject)GameObject.Instantiate(loadObjects[i].gameObject, Vector3.zero, Quaternion.identity);
-            newObject.name = loadObjects[i].name;
+            for (int i = 0; i < loadObjects.Length; i++)
+            {
+                GameObject newObject = (GameObject)GameObject.Instantiate(loadObjects[i].gameObject, Vector3.zero, Quaternion.identity);
+                newObject.name = loadObjects[i].objectName;
+            }
+            loaded = true;
         }
-        loaded = true;
     }
 	
 }
