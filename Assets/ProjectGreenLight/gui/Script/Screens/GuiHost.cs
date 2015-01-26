@@ -6,14 +6,16 @@ public class GuiHost : GuiScreen
 {
 	public InputField field;
 
-	void Start () 
-	{
-	}
-	
-	void Update () 
-	{
-	}
-	
+    internal override void OnNetEvent(Events.Net message)
+    {
+        switch (message)
+        {
+            case Events.Net.SERVER_INIT:
+                ServerInit();
+                break;
+        }
+    }
+
 	public void click(int id)
 	{
 		switch(id)
@@ -40,8 +42,7 @@ public class GuiHost : GuiScreen
         return GuiScreenId.Host;
     }
 
-    //Called on the server whenever a Network.InitializeServer was invoked and has completed.
-    void OnServerInitialized()
+    void ServerInit()
     {
         manager.switchGui(GuiScreenId.LobbyServer); 
     }

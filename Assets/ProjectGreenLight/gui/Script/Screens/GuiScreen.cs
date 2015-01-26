@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class GuiScreen : MonoBehaviour 
+public abstract class GuiScreen : MonoBehaviour 
 {
 	[HideInInspector]
 	public GuiManager manager;
@@ -11,15 +11,13 @@ public class GuiScreen : MonoBehaviour
 		manager = m;
 	}
 
-	public virtual void init()
-	{
-        //Debug.Log("[" + GetGuiId().ToString() + "] init");
-	}
+    public virtual void init()
+    {
+    }
 
-	public virtual void end()
-	{
-        //Debug.Log("[" + GetGuiId().ToString() + "] end");
-	}
+    public virtual void end()
+    {
+    }
 
     void OnEnable()
     {
@@ -35,14 +33,9 @@ public class GuiScreen : MonoBehaviour
 
     internal virtual void OnNetEvent(Events.Net message)
     {
-
     }
 
-    public virtual GuiScreenId GetGuiId()
-	{
-        Debug.LogError("This function must be overritten");
-        return GuiScreenId.Error;
-	}
+    public abstract GuiScreenId GetGuiId();
 
     public virtual void switchGui(GuiScreen screen)
     {

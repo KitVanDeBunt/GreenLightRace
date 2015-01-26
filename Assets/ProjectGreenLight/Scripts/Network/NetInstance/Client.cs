@@ -2,7 +2,8 @@
 
 class Client : NetInstance
 {
-    public Client(NetworkStateManager nsm): base(nsm)
+    public Client(NetworkStateManager nsm, MonoBehaviour monoBehaviour)
+        : base(nsm, monoBehaviour)
     {
 
     }

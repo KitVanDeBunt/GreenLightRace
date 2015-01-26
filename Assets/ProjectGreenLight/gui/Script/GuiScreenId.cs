@@ -1,6 +1,5 @@
 ﻿public enum GuiScreenId
 {
-    Error,
     Main,
     Splash,
     ShowRoom,

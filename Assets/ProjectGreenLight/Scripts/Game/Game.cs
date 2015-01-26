@@ -63,7 +63,7 @@ class Game : MonoBehaviour
         }
     }
 
-    public static List<NetworkPlayerNoir> netPlayerList
+    public static NetworkPlayerNoir[] netPlayerList
     {
         get
         {

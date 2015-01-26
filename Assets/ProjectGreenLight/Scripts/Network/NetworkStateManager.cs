@@ -1,8 +1,8 @@
 ﻿public enum NetworkState
 {
     newInstance,
-    server,
-    server2,
+    host_menu,
+    host_lobby,
     client1,
     client2,
     client3

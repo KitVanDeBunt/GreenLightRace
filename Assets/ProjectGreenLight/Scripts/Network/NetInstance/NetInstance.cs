@@ -1,12 +1,14 @@
 ﻿using UnityEngine;
 
-public class NetInstance
+public abstract class NetInstance
 {
     internal NetworkStateManager nsm_;
+    public NetworkPlayerList playerList;
 
-    public NetInstance(NetworkStateManager nsm)
+    public NetInstance(NetworkStateManager nsm, MonoBehaviour monoBehaviour)
     {
         nsm_ = nsm;
+        playerList = new NetworkPlayerList(monoBehaviour);
     }
 
     public virtual void Init()

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine.UI;
 
 // baseclass for GuiLobbyClient and GuiLobbyServer
-public class GuiLobbyBase : GuiScreen
+public abstract class GuiLobbyBase : GuiScreen
 {
     [SerializeField]
     private Text loadingText;
@@ -31,45 +31,63 @@ public class GuiLobbyBase : GuiScreen
         DrawPlayerList();
     }
 
-    public void click(int id)
+    public override void end()
     {
-        switch (id)
+        RemovePlayerDisplayList();
+    }
+
+    /*public void Refresh()
+    {
+        EventManager.callOnGuiEvent(Events.GUI.REFRESH);
+        DrawPlayerList();
+    }*/
+
+    public override void switchGui(GuiScreen newScreen)
+    {
+        GuiScreenId newScreenId = newScreen.GetGuiId();
+        switch (newScreenId)
         {
-            case 0: //refresh
-                //Game.netMain.RefreshHostList();
-                EventManager.callOnGuiEvent(Events.GUI.REFRESH);
-                DrawPlayerList();
-                break;
+            case GuiScreenId.MultiPlayer: //back
 
-            case 1: //direct
-                manager.switchGui(GuiScreenId.Direct);
-                ((GuiDirect)manager.getMenuById(GuiScreenId.Direct)).returnGui = 1;
-                break;
-
-            case 2: //back
-                //Game.netMain.NetEvent(Events.GUI_BACK);
+                RemovePlayerDisplayList();
                 EventManager.callOnGuiEvent(Events.GUI.BACK);
                 manager.switchGui(GuiScreenId.MultiPlayer);
-                break;
 
+                break;
+        }
+    }
+
+    private void RemovePlayerDisplayList()
+    {
+        if (playerDisplayList != null)
+        {
+            int loopCount = playerDisplayList.Count - 1;
+            for (int i = loopCount; i > -1; i--)
+            {
+                GameObject.Destroy(playerDisplayList[i].gameObject);
+                playerDisplayList.RemoveAt(i);
+            }
         }
     }
 
     private void DrawPlayerList()
     {
-        List<NetworkPlayerNoir> netPlayerList = Game.netPlayerList;
-        if (netPlayerList == null)
+        NetworkPlayerNoir[] netPlayerList = Game.netPlayerList;
+        if (netPlayerList != null)
         {
             loadingText.gameObject.SetActive(false);
+            RemovePlayerDisplayList();
+
+            //new list
             playerDisplayList = new List<GuiLobbyItem>();
-            for (int i = 0; i < netPlayerList.Count; i++)
+            for (int i = 0; i < netPlayerList.Length; i++)
             {
                 //create item
                 GuiLobbyItem newItem = ((GameObject)GameObject.Instantiate(itemPrefab.gameObject, Vector3.zero, Quaternion.identity)).GetComponent<GuiLobbyItem>();
                 playerDisplayList.Add(newItem.GetComponent<GuiLobbyItem>());
                 //position item
                 newItem.transform.SetParent(serverListPanel.transform, false);
-                newItem.transform.Translate(0F, ((1f + (float)i) * -65F), 0F);
+                newItem.transform.Translate(0F, (-31F+((float)i * -35F)), 0F);
                 NetworkPlayerNoir iPlayer = netPlayerList[i];
                 newItem.textPlayerName.text = iPlayer.name;
                 //newItem.textPlayerPing.text = Network.connections[i].
@@ -80,23 +98,10 @@ public class GuiLobbyBase : GuiScreen
         else
         {
             loadingText.gameObject.SetActive(true);
+            //EventManager.callOnGuiEvent(Events.GUI.REFRESH);
         }
     }
 
-    //Called on client during disconnection from server, but also on the server when the connection has disconnected.
-    void OnDisconnectedFromServer(NetworkDisconnection info)
-    {
-        if (Network.isServer)
-        {
-        }
-        else
-        {
-            if (info == NetworkDisconnection.LostConnection)
-            {
-            }
-            else
-            {
-            }
-        }
-    }
+    public override abstract GuiScreenId GetGuiId();
+
 }

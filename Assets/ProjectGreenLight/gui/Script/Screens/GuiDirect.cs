@@ -16,6 +16,7 @@ public class GuiDirect : GuiScreen
 		case 1: if(returnGui == 0) { manager.switchGui("multiplayer"); } else { manager.switchGui("serverlist"); } break;
 		}
 	}*/
+
     public override void switchGui(GuiScreen guiScreen)
     {
         GuiScreenId nextScreenId =guiScreen.GetGuiId();

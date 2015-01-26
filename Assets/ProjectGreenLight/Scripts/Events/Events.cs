@@ -3,7 +3,6 @@
     public enum GUI
     {
         BACK,
-        CLOSE,
         REFRESH,
         SERVER_MENU,
         MENU_SERVERLIST,
@@ -12,6 +11,7 @@
     }
     public enum Net
     {
-        NEW_PLAYER_LIST
+        NEW_PLAYER_LIST,
+        SERVER_INIT
     }
 }
