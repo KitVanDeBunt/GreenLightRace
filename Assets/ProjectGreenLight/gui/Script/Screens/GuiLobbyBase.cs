@@ -87,11 +87,56 @@ public abstract class GuiLobbyBase : GuiScreen
                 playerDisplayList.Add(newItem.GetComponent<GuiLobbyItem>());
                 //position item
                 newItem.transform.SetParent(serverListPanel.transform, false);
-                newItem.transform.Translate(0F, (-31F+((float)i * -35F)), 0F);
+                newItem.transform.Translate(0F, (-15F+ ((float)i * -30F)), 0F);
                 NetworkPlayerNoir iPlayer = netPlayerList[i];
                 newItem.textPlayerName.text = iPlayer.name;
                 //newItem.textPlayerPing.text = Network.connections[i].
-                newItem.textPlayerReady.text = "ready?";
+                if (iPlayer.state == NetworkPlayerNoirState.ready)
+                {
+                    newItem.readyToggleButton.targetGraphic.color = newItem.colorReady;
+                    Debug.Log("Player: "+iPlayer.name+" -- ready");
+                }
+                else
+                {
+                    newItem.readyToggleButton.targetGraphic.color = newItem.colorNotReady;
+                    Debug.Log("Player: " + iPlayer.name + " -- not ready");
+                }
+                //
+                if (iPlayer.netPlayer == Network.player)
+                {
+                    //set self graphic
+                    newItem.selfGraphic.gameObject.SetActive(true);
+                    //ready toggle
+                    newItem.readyToggleButton.enabled = true;
+                    newItem.readyToggleButton.onClick.AddListener(
+                        delegate
+                        {
+                            ToggleReady();
+                        }
+                    );
+                    //
+                    newItem.kickButton.gameObject.SetActive(false);
+                }
+                else
+                {
+                    newItem.selfGraphic.gameObject.SetActive(false);
+                    if (Network.isServer)
+                    {
+                        newItem.readyToggleButton.enabled = false;
+
+                        newItem.kickButton.gameObject.SetActive(true);
+                        newItem.kickButton.onClick.AddListener(
+                            delegate
+                            {
+                                KickPlayer(iPlayer);
+                            });
+                    }
+                    else
+                    {
+                        newItem.readyToggleButton.enabled = false;
+                        newItem.kickButton.gameObject.SetActive(false);
+                    }
+                }
                 newItem.textPlayerPing.text = "ping?";
             }
         }
@@ -100,6 +145,16 @@ public abstract class GuiLobbyBase : GuiScreen
             loadingText.gameObject.SetActive(true);
             //EventManager.callOnGuiEvent(Events.GUI.REFRESH);
         }
+    }
+
+    void KickPlayer(NetworkPlayerNoir player)
+    {
+        Game.KickPlayer(player);
+    }
+
+    void ToggleReady()
+    {
+        Game.ToggleReady();
     }
 
     public override abstract GuiScreenId GetGuiId();

@@ -1,11 +1,13 @@
-﻿using UnityEngine;
-using UnityEngine.UI;
+﻿using UnityEngine.UI;
 
-public class GuiLobbyItem : MonoBehaviour
+public class GuiLobbyItem : UnityEngine.MonoBehaviour
 {
-    public Button botton;
+    public Graphic selfGraphic;
+    public Button readyToggleButton;
     public Text textPlayerName;
     public Text textPlayerPing;
-    public Text textPlayerReady;
     public Button kickButton;
+
+    public UnityEngine.Color32 colorReady;
+    public UnityEngine.Color32 colorNotReady;
 }

@@ -2,7 +2,7 @@
 
 public enum NetworkPlayerNoirState
 {
-    joined,
+    notReady,
     ready,
     inGame
 }

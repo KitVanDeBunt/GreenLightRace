@@ -46,6 +46,17 @@ public class NetworkMain : LoaderObject
         }
     }
 
+    public void KickPlayer(NetworkPlayerNoir player)
+    {
+        netInstance.playerList.KickPlayer(player);
+    }
+
+
+    public void ToggleReady()
+    {
+        netInstance.playerList.ToggleReady();
+    }
+
     void OnEnable()
     {
         EventManager.OnGuiEvent += GuiEvent;
@@ -232,7 +243,7 @@ public class NetworkMain : LoaderObject
         //Game.SpawnPlayer(carList, 1, CarType.self, spawnServer,cam);
         //Game.SpawnPlayer(carList, 0, CarType.aI, spawnAI, cam);
 
-        netInstance.playerList.RPCRegisterPlayer(Network.player, Settings.Player.name, (int)NetworkPlayerNoirState.joined);
+        netInstance.playerList.RPCRegisterPlayer(Network.player, Settings.Player.name, (int)NetworkPlayerNoirState.notReady);
     }
 
     //Called on client during disconnection from server, but also on the server when the connection has disconnected.
@@ -280,7 +291,7 @@ public class NetworkMain : LoaderObject
         nsm.menuState = NetworkState.client2;
         // Game.SpawnPlayer(carList, 1, CarType.self, spawnServer, cam);
 
-        networkView.RPC("RPCRegisterPlayer", RPCMode.Server, Network.player, Settings.Player.name, (int)NetworkPlayerNoirState.joined);
+        networkView.RPC("RPCRegisterPlayer", RPCMode.Server, Network.player, Settings.Player.name, (int)NetworkPlayerNoirState.notReady);
     }
 
     //Called on the server whenever a player is disconnected from the server.
@@ -291,6 +302,12 @@ public class NetworkMain : LoaderObject
         Network.DestroyPlayerObjects(player);
 
         netInstance.playerList.RPCUnregisterPlayer(player);
+    }
+
+    [RPC]
+    public void RPCToggleReady(NetworkPlayer player)
+    {
+        netInstance.playerList.RPCToggleReady(player);
     }
 
     [RPC]

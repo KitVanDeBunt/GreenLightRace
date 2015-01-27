@@ -70,6 +70,16 @@ class Game : MonoBehaviour
             return netMain.playerList;
         }
     }
+
+    public static void ToggleReady()
+    {
+        netMain.ToggleReady();
+    }
+
+    public static void KickPlayer(NetworkPlayerNoir player)
+    {
+        netMain.KickPlayer(player);
+    }
     
     private int NextCarID()
     {
