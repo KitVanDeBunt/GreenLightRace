@@ -23,4 +23,8 @@ public abstract class NetInstance
     {
         Network.Disconnect();
     }
+
+    public virtual void Loop(){
+        playerList.Loop();
+    }
 }

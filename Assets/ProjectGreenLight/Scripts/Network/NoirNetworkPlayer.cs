@@ -10,6 +10,7 @@ public enum NetworkPlayerNoirState
 public class NetworkPlayerNoir
 {
     private string name_;
+    private int ping_ = 0;
     private NetworkPlayer netPlayer_;
     private NetworkPlayerNoirState state_;
 
@@ -21,16 +22,28 @@ public class NetworkPlayerNoir
         Debug.Log("new player name:" + name_);
     }
 
+    public int ping
+    {
+        get
+        {
+            return ping_;
+        }
+        set
+        {
+            ping_ = value;
+        }
+    }
+
     public string name
     {
         get
         {
-            Debug.Log("get player name:" + name_);
+            //Debug.Log("get player name:" + name_);
             return name_;
         }
         set
         {
-            Debug.Log("set player name:" + value);
+            //Debug.Log("set player name:" + value);
             name_ = value;
         }
     }
@@ -39,12 +52,12 @@ public class NetworkPlayerNoir
     {
         get
         {
-            Debug.Log("get player state" + state_);
+           // Debug.Log("get player state" + state_);
             return state_;
         }
         set
         {
-            Debug.Log("set player state:" + value);
+            //Debug.Log("set player state:" + value);
             state_ = value;
         }
     }

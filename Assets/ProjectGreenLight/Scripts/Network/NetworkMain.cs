@@ -71,6 +71,15 @@ public class NetworkMain : LoaderObject
     {
         nsm = new NetworkStateManager(this);
         console = gameObject.GetComponent<Console>();
+        InvokeRepeating("Loop", 0F, 0.5F);
+    }
+
+    void Loop()
+    {
+        if (netInstance != null)
+        {
+            netInstance.Loop();
+        }
     }
 
     void OnGUI()
@@ -302,6 +311,12 @@ public class NetworkMain : LoaderObject
         Network.DestroyPlayerObjects(player);
 
         netInstance.playerList.RPCUnregisterPlayer(player);
+    }
+
+    [RPC]
+    public void RPCRecievePing(NetworkPlayer player, int ping)
+    {
+        netInstance.playerList.RPCRecievePing(player,ping);
     }
 
     [RPC]

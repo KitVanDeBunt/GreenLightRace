@@ -54,14 +54,40 @@ public class NetworkPlayerList
         }
         return null;
     }
+
+    public void Loop()
+    {
+        Ping();
+    }
+
+    public void Ping()
+    {
+        if (Network.isClient)
+	    {
+            Debug.Log(Network.GetLastPing(Network.connections[0]));
+            monoBehaviour_.networkView.RPC("RPCRecievePing", RPCMode.All, Network.player, Network.GetLastPing(Network.connections[0]));
+	    }
+    }
+
     public void KickPlayer(NetworkPlayerNoir player)
     {
         Network.CloseConnection(player.netPlayer, true);
     }
+
     public void ToggleReady()
     {
         monoBehaviour_.networkView.RPC("RPCToggleReady", RPCMode.Others, Network.player);
         RPCToggleReady(Network.player);
+    }
+
+    public void RPCRecievePing(NetworkPlayer player, int ping)
+    {
+        NetworkPlayerNoir noirPlayer = GetNoirNetworkPlayer(player);
+        if (noirPlayer != null)
+        {
+            noirPlayer.ping = ping;
+            Debug.Log(noirPlayer.name+" p: "+ noirPlayer.ping);
+        }
     }
 
     public void RPCToggleReady(NetworkPlayer player)
@@ -80,6 +106,7 @@ public class NetworkPlayerList
             EventManager.callOnNetEvent(Events.Net.NEW_PLAYER_LIST);
         }
     }
+
     public void RPCSetPlayerState(NetworkPlayer player, int state)
     {
         if (CheckIfPlayerInPlayerList(player))
@@ -104,17 +131,26 @@ public class NetworkPlayerList
     {
         if (!CheckIfPlayerInPlayerList(newPlayer))
         {
+            bool isNotNewPlayer = (newPlayer != Network.player);
+            //register players on clients
+            if (Network.isServer && isNotNewPlayer)
+            {
+                for (int i = 0; i < playerList_.Count; i++)
+                {
+                    //register player list at new client
+                    monoBehaviour_.networkView.RPC("RPCRegisterPlayer", newPlayer, playerList_[i].netPlayer, playerList_[i].name, (int)playerList_[i].state);
+                    if (playerList_[i].netPlayer != Network.player)
+                    {
+                        //register new client at playerlist exept server
+                        monoBehaviour_.networkView.RPC("RPCRegisterPlayer", playerList_[i].netPlayer, newPlayer, newPlayername, (int)state);
+                    }
+                }
+                //register new client at new client
+                monoBehaviour_.networkView.RPC("RPCRegisterPlayer", newPlayer, newPlayer, newPlayername, (int)state);
+            }
             //register player
             NetworkPlayerNoir newPlayerNoir = new NetworkPlayerNoir(newPlayername, (NetworkPlayerNoirState)state, newPlayer);
             playerList_.Add(newPlayerNoir);
-            //register player
-            if (Network.isServer && newPlayer != Network.player)
-            {
-                //register server at new client
-                monoBehaviour_.networkView.RPC("RPCRegisterPlayer", newPlayer, Network.player, Settings.Player.name, (int)NetworkPlayerNoirState.notReady);
-                //register new client at other clients
-                monoBehaviour_.networkView.RPC("RPCRegisterPlayer", RPCMode.Others, newPlayer, newPlayername, (int)state);
-            }
             //call event to update ui
             EventManager.callOnNetEvent(Events.Net.NEW_PLAYER_LIST);
         }

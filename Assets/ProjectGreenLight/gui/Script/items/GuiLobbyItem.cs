@@ -8,6 +8,7 @@ public class GuiLobbyItem : UnityEngine.MonoBehaviour
     public Text textPlayerPing;
     public Button kickButton;
 
+    public NetworkPlayerNoir player;
     public UnityEngine.Color32 colorReady;
     public UnityEngine.Color32 colorNotReady;
 }
