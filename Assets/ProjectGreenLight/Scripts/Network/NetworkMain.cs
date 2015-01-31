@@ -51,6 +51,10 @@ public class NetworkMain : LoaderObject
         netInstance.playerList.KickPlayer(player);
     }
 
+    public void SendChatMessage(string message)
+    {
+        netInstance.chat.SendChatMessage(message);
+    }
 
     public void ToggleReady()
     {
@@ -335,6 +339,12 @@ public class NetworkMain : LoaderObject
     public void RPCUnregisterPlayer(NetworkPlayer player)
     {
         netInstance.playerList.RPCUnregisterPlayer(player);
+    }
+
+    [RPC]
+    public void RPCChatMessage(string message, NetworkMessageInfo info)
+    {
+        netInstance.chat.RPCChatMessage(message,info);
     }
 
     //Used to customize synchronization of variables in a script watched by a network view.

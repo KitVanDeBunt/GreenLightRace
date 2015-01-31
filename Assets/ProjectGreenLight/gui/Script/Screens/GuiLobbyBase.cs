@@ -17,7 +17,7 @@ public abstract class GuiLobbyBase : GuiScreen
     [SerializeField]
     private GuiLobbyItem itemPrefab;
     [SerializeField]
-    private Scrollbar scrollBar;
+    private Scrollbar scrollBarMessageList;
 
     //ui chat box
     [SerializeField]
@@ -32,7 +32,6 @@ public abstract class GuiLobbyBase : GuiScreen
     private HostData[] hostList;
     private List<GuiLobbyItem> playerDisplayList;
     private List<GuiLobbyChatItem> chatDisplayList;
-    private int chatNum = 0;
 
     internal override void OnNetEvent(Events.Net message)
     {
@@ -40,6 +39,9 @@ public abstract class GuiLobbyBase : GuiScreen
         {
             case Events.Net.NEW_PLAYER_LIST:
                 DrawPlayerList();
+                break;
+            case Events.Net.NEW_MESSAGE:
+                AddMessage();
                 break;
         }
     }
@@ -58,40 +60,44 @@ public abstract class GuiLobbyBase : GuiScreen
     public override void end()
     {
         RemovePlayerDisplayList();
+        ClearChatBoxDisplayList();
+        SetRectTransformVerticalListHeight(serverListPanel.rectTransform, 0, 30F, serverListPanelParent.rectTransform);
+        SetRectTransformVerticalListHeight(chatBoxPanel.rectTransform, 0, 20F, ChatBoxPanelParent.rectTransform);
     }
 
     void OnChatInputEnd()
     {
         //input
         string input = chatInput.text;
-        
-        chatInput.text = "";
+        if (chatInput.text != "")
+        {
+            chatInput.text = "";
+            Game.SendChatMessage(input); 
+        }
+    }
 
+    private void AddMessage()
+    {
         GuiLobbyChatItem newItem = ((GameObject)GameObject.Instantiate(chatItemPrefab.gameObject, Vector3.zero, Quaternion.identity)).GetComponent<GuiLobbyChatItem>();
-        newItem.text.text = input;
+        Noir.Network.Message[] messages = Noir.Network.ChatManager.messages;
+        Noir.Network.Message message = messages[messages.Length - 1];
+        newItem.text.text = (message.messageOrigin + ": " + message.message);
         chatDisplayList.Add(newItem.GetComponent<GuiLobbyChatItem>());
         //position item
         newItem.transform.SetParent(chatBoxPanel.transform, false);
-        newItem.transform.Translate(0F, (-10F + ((float)chatNum * -20F)), 0F);
-
-        chatNum++;
-
-        //input box size 
-        float newHeight = (20F * chatDisplayList.Count);
-        float parentHeight = RectTransformUtil.GetHeight(ChatBoxPanelParent.rectTransform);
-        if (parentHeight > newHeight)
-        {
-            newHeight = parentHeight;
-        }
-        RectTransformUtil.SetHeight(chatBoxPanel.rectTransform, newHeight);
-
-        scrollBar.value = 0;
+        newItem.transform.Translate(0F, (-10F + ((float)chatDisplayList.Count * -20F)), 0F);
+        //self icon
+        newItem.selfIcon.gameObject.SetActive(message.self);
+        //chatmessage box size 
+        SetRectTransformVerticalListHeight(chatBoxPanel.rectTransform, chatDisplayList.Count, 20F, ChatBoxPanelParent.rectTransform);
+        //scroll to bottom
+        //scrollBarMessageList.value = 0;
+        ChatBoxPanelParent.gameObject.GetComponent<ScrollRect>().velocity = new Vector2(0, 1000f);
+        
 
         //UnityEngine.EventSystems.EventSystem.current.SetSelectedGameObject(chatInput.gameObject, null);
         //chatInput.OnPointerClick(new PointerEventData(EventSystem.current));
     }
-
-
     /*public void Refresh()
     {
         EventManager.callOnGuiEvent(Events.GUI.REFRESH);
@@ -105,7 +111,6 @@ public abstract class GuiLobbyBase : GuiScreen
         {
             case GuiScreenId.MultiPlayer: //back
 
-                RemovePlayerDisplayList();
                 EventManager.callOnGuiEvent(Events.GUI.BACK);
                 manager.switchGui(GuiScreenId.MultiPlayer);
 
@@ -126,19 +131,37 @@ public abstract class GuiLobbyBase : GuiScreen
         }
     }
 
+    private void ClearChatBoxDisplayList()
+    {
+        if (chatDisplayList != null)
+        {
+            int loopCount = chatDisplayList.Count - 1;
+            for (int i = loopCount; i > -1; i--)
+            {
+                GameObject.Destroy(chatDisplayList[i].gameObject);
+                chatDisplayList.RemoveAt(i);
+            }
+        }
+    }
+
+    private void SetRectTransformVerticalListHeight(RectTransform rectTrans, int lenght, float itemHeight, RectTransform minHeight)
+    {
+        float newHeight = (itemHeight * lenght);
+        float parentHeight = RectTransformUtil.GetHeight(minHeight);
+        if (parentHeight > newHeight)
+        {
+            newHeight = parentHeight;
+        }
+        RectTransformUtil.SetHeight(rectTrans, newHeight);
+    }
+
     private void DrawPlayerList()
     {
         NetworkPlayerNoir[] netPlayerList = Game.netPlayerList;
         //list background size
         if (netPlayerList != null)
         {
-            float newHeight = (30F * netPlayerList.Length);
-            float parentHeight = RectTransformUtil.GetHeight(serverListPanelParent.rectTransform);
-            if (parentHeight > newHeight)
-            {
-                newHeight = parentHeight;
-            }
-            RectTransformUtil.SetHeight(serverListPanel.rectTransform, newHeight);
+            SetRectTransformVerticalListHeight(serverListPanel.rectTransform,netPlayerList.Length,30F,serverListPanelParent.rectTransform);
         }
 
         if (netPlayerList != null)
@@ -226,6 +249,7 @@ public abstract class GuiLobbyBase : GuiScreen
         {
             for (int i = 0; i < playerDisplayList.Count; i++)
             {
+                //update ping
                 playerDisplayList[i].textPlayerPing.text = playerDisplayList[i].player.ping.ToString();
             } 
         }

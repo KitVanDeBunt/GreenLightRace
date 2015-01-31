@@ -80,6 +80,11 @@ class Game : MonoBehaviour
     {
         netMain.KickPlayer(player);
     }
+
+    public static void SendChatMessage(string message)
+    {
+        netMain.SendChatMessage(message);
+    }
     
     private int NextCarID()
     {

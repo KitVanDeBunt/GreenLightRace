@@ -12,6 +12,7 @@
     public enum Net
     {
         NEW_PLAYER_LIST,
-        SERVER_INIT
+        SERVER_INIT,
+        NEW_MESSAGE
     }
 }

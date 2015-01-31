@@ -16,24 +16,27 @@ public class GuiHost : GuiScreen
         }
     }
 
-	public void click(int id)
-	{
-		switch(id)
-		{
-		case 0: 
-            startServer(field.text); 
-            break;
+    public override void switchGui(GuiScreen newScreen)
+    {
+        GuiScreenId newScreenId = newScreen.GetGuiId();
+        switch (newScreenId)
+        {
+            case GuiScreenId.MultiPlayer: //back
 
-        case 1: 
-            manager.switchGui(GuiScreenId.MultiPlayer); 
-            break;
-		}
-	}
+                EventManager.callOnGuiEvent(Events.GUI.BACK);
+                manager.switchGui(GuiScreenId.MultiPlayer);
 
-	public void startServer(string roomName)
+                break;
+        }
+    }
+
+	public void startServer()
 	{
-        Settings.Player.roomname = roomName;
-        EventManager.callOnGuiEvent(Events.GUI.START_SERVER);
+        Settings.Player.roomname = field.text;
+        if (field.text != "")
+        {
+            EventManager.callOnGuiEvent(Events.GUI.START_SERVER);
+        }
 		//Debug.Log("server started - name:" + roomName);
 	}
 

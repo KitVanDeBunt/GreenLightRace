@@ -43,7 +43,7 @@ public class NetworkPlayerList
         return false;
     }
 
-    private NetworkPlayerNoir GetNoirNetworkPlayer(NetworkPlayer player)
+    public NetworkPlayerNoir GetNoirNetworkPlayer(NetworkPlayer player)
     {
         for (int i = 0; i < playerList_.Count; i++)
         {

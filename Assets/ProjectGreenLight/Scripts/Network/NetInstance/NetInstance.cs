@@ -4,11 +4,13 @@ public abstract class NetInstance
 {
     internal NetworkStateManager nsm_;
     public NetworkPlayerList playerList;
+    public Noir.Network.ChatManager chat;
 
     public NetInstance(NetworkStateManager nsm, MonoBehaviour monoBehaviour)
     {
         nsm_ = nsm;
         playerList = new NetworkPlayerList(monoBehaviour);
+        chat = new Noir.Network.ChatManager(monoBehaviour, playerList);
     }
 
     public virtual void Init()
