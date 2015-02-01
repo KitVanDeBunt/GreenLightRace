@@ -7,7 +7,7 @@ enum CarType
     aI
 }
 
-enum CarID
+public enum CarID
 {
     joppeHotrod,
     maartenNucleoid,

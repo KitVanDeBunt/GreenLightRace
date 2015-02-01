@@ -3,20 +3,14 @@ using System.Collections;
 
 public class ShowroomCar : MonoBehaviour 
 {
-	public string CarName;
+    [SerializeField]
+	private CarID carId_;
 
-	void Start () 
+	public CarID carId
 	{
-	
-	}
-
-	void Update () 
-	{
-	
-	}
-
-	public string getCarName()
-	{
-		return CarName;
+        get
+        {
+            return carId_;
+        }
 	}
 }

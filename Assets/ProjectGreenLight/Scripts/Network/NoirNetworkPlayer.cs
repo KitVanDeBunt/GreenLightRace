@@ -12,6 +12,7 @@ public class NetworkPlayerNoir
     private string name_;
     private int ping_ = 0;
     private NetworkPlayer netPlayer_;
+    private CarID carId_;
     private NetworkPlayerNoirState state_;
 
     public NetworkPlayerNoir(string name, NetworkPlayerNoirState state, NetworkPlayer netPlayer)
@@ -59,6 +60,20 @@ public class NetworkPlayerNoir
         {
             //Debug.Log("set player state:" + value);
             state_ = value;
+        }
+    }
+
+
+
+    public CarID carId
+    {
+        get
+        {
+            return carId_;
+        }
+        set
+        {
+            carId_ = value;
         }
     }
 

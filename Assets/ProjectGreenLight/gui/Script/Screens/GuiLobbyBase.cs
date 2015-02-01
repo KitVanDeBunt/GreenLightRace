@@ -45,6 +45,10 @@ public abstract class GuiLobbyBase : GuiScreen
                 break;
         }
     }
+    public void StartGame()
+    {
+        Game.Load();
+    }
 
     public override void init()
     {
@@ -85,7 +89,7 @@ public abstract class GuiLobbyBase : GuiScreen
         chatDisplayList.Add(newItem.GetComponent<GuiLobbyChatItem>());
         //position item
         newItem.transform.SetParent(chatBoxPanel.transform, false);
-        newItem.transform.Translate(0F, (-10F + ((float)chatDisplayList.Count * -20F)), 0F);
+        newItem.transform.Translate(0F, (-10F + (((float)chatDisplayList.Count-1) * -20F)), 0F);
         //self icon
         newItem.selfIcon.gameObject.SetActive(message.self);
         //chatmessage box size 
@@ -182,6 +186,7 @@ public abstract class GuiLobbyBase : GuiScreen
                 newItem.transform.Translate(0F, (-15F+ ((float)i * -30F)), 0F);
                 NetworkPlayerNoir iPlayer = netPlayerList[i];
                 newItem.textPlayerName.text = iPlayer.name;
+                newItem.textPlayerCarId.text = iPlayer.carId.ToString();
                 //newItem.textPlayerPing.text = Network.connections[i].
                 if (iPlayer.state == NetworkPlayerNoirState.ready)
                 {

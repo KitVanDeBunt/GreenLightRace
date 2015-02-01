@@ -74,9 +74,9 @@ public class ShowroomManager : MonoBehaviour
 	}
 	*/
 
-	public string getCarName()
+	public CarID getCurrentCarId()
 	{
-		return cars[carSelected].CarName;
+		return cars[carSelected].carId;
 	}
 
 	public void stopSound()

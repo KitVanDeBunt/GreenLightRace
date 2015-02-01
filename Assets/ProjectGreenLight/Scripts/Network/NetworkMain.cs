@@ -4,18 +4,6 @@ using System.Collections.Generic;
 
 public class NetworkMain : LoaderObject
 {
-    //game
-    [SerializeField]
-    private CarList carList;
-    [SerializeField]
-    private VehicleFollow cam;
-    [SerializeField]
-    private Transform spawnServer;
-    [SerializeField]
-    private Transform spawnClient;
-    [SerializeField]
-    private Transform spawnAI;
-
     //network
     private NetworkStateManager nsm;
     private NetInstance netInstance;
@@ -56,9 +44,41 @@ public class NetworkMain : LoaderObject
         netInstance.chat.SendChatMessage(message);
     }
 
+    public void RegisterCarID(CarID carId)
+    {
+        netInstance.playerList.RegisterCarID(carId);
+    }
+
     public void ToggleReady()
     {
         netInstance.playerList.ToggleReady();
+    }
+
+    public void Load()
+    {
+        networkView.RPC("LoadLevel", RPCMode.OthersBuffered);
+        StartCoroutine(LoadLevel());
+    }
+
+    [RPC]
+    private IEnumerator LoadLevel()
+    {
+        // There is no reason to send any more data over the network on the default channel,
+        // because we are about to load the level, thus all those objects will get deleted anyway
+        Network.SetSendingEnabled(0, false);
+
+        // We need to stop receiving because first the level must be loaded first.
+        // Once the level is loaded, rpc's and other state update attached to objects in the level are allowed to fire
+        Network.isMessageQueueRunning = false;
+
+        Application.LoadLevel(Settings.Levels.LEVEL_1);
+        yield return true;
+        yield return true;
+
+        // Allow receiving data again
+        Network.isMessageQueueRunning = true;
+        // Now the level has been loaded and we can start sending out data to clients
+        Network.SetSendingEnabled(0, true);
     }
 
     void OnEnable()
@@ -78,6 +98,14 @@ public class NetworkMain : LoaderObject
         InvokeRepeating("Loop", 0F, 0.5F);
     }
 
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.C))
+        {
+            console.enabled = !console.enabled;
+        }
+    }
+
     void Loop()
     {
         if (netInstance != null)
@@ -86,20 +114,12 @@ public class NetworkMain : LoaderObject
         }
     }
 
-    void OnGUI()
+    /*void OnGUI()
     {
         buttonNum = 0;
         OnGuiDrawConsole();
         //OnGuiDrawNetMenu();
-    }
-
-    void OnGuiDrawConsole()
-    {
-        if (GUI.Button(ButtonRect(buttonY, buttonDist, buttonNum), "Console"))
-        {
-            console.enabled = !console.enabled;
-        };
-    }
+    }*/
 
     public void GuiEvent(Events.GUI message)
     {
@@ -257,6 +277,7 @@ public class NetworkMain : LoaderObject
         //Game.SpawnPlayer(carList, 0, CarType.aI, spawnAI, cam);
 
         netInstance.playerList.RPCRegisterPlayer(Network.player, Settings.Player.name, (int)NetworkPlayerNoirState.notReady);
+        netInstance.playerList.RPCRegisterCarID(Network.player, (int)Settings.Player.carID);
     }
 
     //Called on client during disconnection from server, but also on the server when the connection has disconnected.
@@ -277,6 +298,7 @@ public class NetworkMain : LoaderObject
                 Console.Log("Successfully diconnected from the server");
             }
         }
+        Application.LoadLevel(Settings.Levels.MENU);
     }
 
     //Called on the client when a connection attempt fails for some reason.
@@ -305,6 +327,7 @@ public class NetworkMain : LoaderObject
         // Game.SpawnPlayer(carList, 1, CarType.self, spawnServer, cam);
 
         networkView.RPC("RPCRegisterPlayer", RPCMode.Server, Network.player, Settings.Player.name, (int)NetworkPlayerNoirState.notReady);
+        networkView.RPC("RPCRegisterCarID", RPCMode.Server, Network.player, (int)Settings.Player.carID);
     }
 
     //Called on the server whenever a player is disconnected from the server.
@@ -315,6 +338,12 @@ public class NetworkMain : LoaderObject
         Network.DestroyPlayerObjects(player);
 
         netInstance.playerList.RPCUnregisterPlayer(player);
+    }
+
+    [RPC]
+    public void RPCRegisterCarID(NetworkPlayer player, int carId)
+    {
+        netInstance.playerList.RPCRegisterCarID(player, carId);
     }
 
     [RPC]

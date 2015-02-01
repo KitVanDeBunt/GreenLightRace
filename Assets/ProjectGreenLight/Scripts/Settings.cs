@@ -1,6 +1,11 @@
 ﻿
 namespace Settings
 {
+    class Levels
+    {
+        public const string MENU = "menu";
+        public const string LEVEL_1 = "level_1";
+    }
     class Net
     {
         public const int MAX_PLAYERS = 5;

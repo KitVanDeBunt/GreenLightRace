@@ -19,7 +19,7 @@ public class GuiShowroom : GuiScreen
 	{
 		manager.showroomManager.gameObject.SetActive(true);
 		manager.showroomManager.switchCar(0);
-		carText.text = manager.showroomManager.getCarName();
+		carText.text = manager.showroomManager.getCurrentCarId().ToString();
 	}
 	
 	public override void end()
@@ -32,9 +32,25 @@ public class GuiShowroom : GuiScreen
 	{
 		switch(id)
 		{
-		case 0: manager.showroomManager.switchCar(-1); carText.text = manager.showroomManager.getCarName(); break;
-		case 1: manager.showroomManager.switchCar(1); carText.text = manager.showroomManager.getCarName(); break;
-		case 2: manager.switchGui(GuiScreenId.Main); break;
+		case 0: 
+
+            manager.showroomManager.switchCar(-1); 
+            carText.text = manager.showroomManager.getCurrentCarId().ToString();
+            Settings.Player.carID = manager.showroomManager.getCurrentCarId();
+
+            break;
+		case 1: 
+
+            manager.showroomManager.switchCar(1); 
+            carText.text = manager.showroomManager.getCurrentCarId().ToString();
+            Settings.Player.carID = manager.showroomManager.getCurrentCarId();
+
+            break;
+		case 2:
+            
+            manager.switchGui(GuiScreenId.Main); 
+
+            break;
 		}
 	}
 

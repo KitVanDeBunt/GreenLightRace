@@ -6,6 +6,7 @@ public class GuiLobbyItem : UnityEngine.MonoBehaviour
     public Button readyToggleButton;
     public Text textPlayerName;
     public Text textPlayerPing;
+    public Text textPlayerCarId;
     public Button kickButton;
 
     public NetworkPlayerNoir player;

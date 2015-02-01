@@ -80,6 +80,23 @@ public class NetworkPlayerList
         RPCToggleReady(Network.player);
     }
 
+    public void RegisterCarID(CarID carId)
+    {
+        monoBehaviour_.networkView.RPC("RPCRegisterCarID", RPCMode.Others, (int)carId);
+        RPCRegisterCarID(Network.player, (int)carId);
+    }
+
+    public void RPCRegisterCarID(NetworkPlayer player, int id)
+    {
+        NetworkPlayerNoir noirPlayer = GetNoirNetworkPlayer(player);
+        if (noirPlayer != null)
+        {
+            noirPlayer.carId = (CarID)id;
+            Debug.Log(noirPlayer.carId+"");
+        }
+        EventManager.callOnNetEvent(Events.Net.NEW_PLAYER_LIST);
+    }
+
     public void RPCRecievePing(NetworkPlayer player, int ping)
     {
         NetworkPlayerNoir noirPlayer = GetNoirNetworkPlayer(player);
@@ -150,6 +167,7 @@ public class NetworkPlayerList
             }
             //register player
             NetworkPlayerNoir newPlayerNoir = new NetworkPlayerNoir(newPlayername, (NetworkPlayerNoirState)state, newPlayer);
+            newPlayerNoir.carId = CarID.thomasCar;
             playerList_.Add(newPlayerNoir);
             //call event to update ui
             EventManager.callOnNetEvent(Events.Net.NEW_PLAYER_LIST);

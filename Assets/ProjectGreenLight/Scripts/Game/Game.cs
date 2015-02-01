@@ -71,9 +71,19 @@ class Game : MonoBehaviour
         }
     }
 
+    public static void Load()
+    {
+        netMain.Load();
+    }
+
     public static void ToggleReady()
     {
         netMain.ToggleReady();
+    }
+
+    public static void RegisterCarID(CarID carId)
+    {
+        netMain.RegisterCarID(carId);
     }
 
     public static void KickPlayer(NetworkPlayerNoir player)
@@ -121,13 +131,5 @@ class Game : MonoBehaviour
                 SwitchCam(NextCarID());
             }
         }
-    }
-    
-    public WorldPath worldPath
-    {
-    	get
-    	{
-			return worldPath_;
-    	}
     }
 }
