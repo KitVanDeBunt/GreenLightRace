@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<products>
+  <item>
+    <title>FT Magic Effects Volume02</title>
+    <id>3299</id>
+    <url>https://www.assetstore.unity3d.com/en/#!/content/3299</url>
+    <icon>http://www.polyfied.com/products/playground/extensions/icons/3299.png</icon>
+    <iconid>3299</iconid>
+    <category>Magic</category>
+    <publisher>FlyingTeapot</publisher>
+    <publisherurl>https://www.assetstore.unity3d.com/en/#!/publisher/210</publisherurl>
+  </item>
+  <item>
+    <title>FT Magic Effects Volume01</title>
+    <id>2598</id>
+    <url>https://www.assetstore.unity3d.com/en/#!/content/2598</url>
+    <icon>http://www.polyfied.com/products/playground/extensions/icons/2598.png</icon>
+    <iconid>2598</iconid>
+    <category>Magic</category>
+    <publisher>FlyingTeapot</publisher>
+    <publisherurl>https://www.assetstore.unity3d.com/en/#!/publisher/210</publisherurl>
+  </item>
+  <item>
+    <title>FT ImpactEffects Volume01</title>
+    <id>2778</id>
+    <url>https://www.assetstore.unity3d.com/en/#!/content/2778</url>
+    <icon>http://www.polyfied.com/products/playground/extensions/icons/2778.png</icon>
+    <iconid>2778</iconid>
+    <category>Magic</category>
+    <publisher>FlyingTeapot</publisher>
+    <publisherurl>https://www.assetstore.unity3d.com/en/#!/publisher/210</publisherurl>
+  </item>
+</products>

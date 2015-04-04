@@ -29,6 +29,6 @@ public class Reset : MonoBehaviour {
 	public void ResetGame(Transform spawnPoint){
 		resetObject.transform.position = spawnPoint.transform.position;
 		resetObject.transform.rotation = spawnPoint.transform.rotation;
-		rigidbody.velocity = Vector3.zero;
+		GetComponent<Rigidbody>().velocity = Vector3.zero;
 	}
 }

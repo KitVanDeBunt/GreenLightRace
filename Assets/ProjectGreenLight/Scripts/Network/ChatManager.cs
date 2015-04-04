@@ -25,7 +25,7 @@ namespace Noir.Network
         public void SendChatMessage(string message)
         {
             RPCChatMessage(message);
-            monoBehaviour_.networkView.RPC("RPCChatMessage", UnityEngine.RPCMode.Others, message);
+            monoBehaviour_.GetComponent<UnityEngine.NetworkView>().RPC("RPCChatMessage", UnityEngine.RPCMode.Others, message);
         }
 
         public void RPCChatMessage(string message, UnityEngine.NetworkMessageInfo info)

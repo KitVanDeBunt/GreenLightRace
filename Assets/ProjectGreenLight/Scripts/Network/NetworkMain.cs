@@ -56,7 +56,7 @@ public class NetworkMain : LoaderObject
 
     public void Load()
     {
-        networkView.RPC("LoadLevel", RPCMode.OthersBuffered);
+        GetComponent<NetworkView>().RPC("LoadLevel", RPCMode.OthersBuffered);
         StartCoroutine(LoadLevel());
     }
 
@@ -326,8 +326,8 @@ public class NetworkMain : LoaderObject
         nsm.menuState = NetworkState.client2;
         // Game.SpawnPlayer(carList, 1, CarType.self, spawnServer, cam);
 
-        networkView.RPC("RPCRegisterPlayer", RPCMode.Server, Network.player, Settings.Player.name, (int)NetworkPlayerNoirState.notReady);
-        networkView.RPC("RPCRegisterCarID", RPCMode.Server, Network.player, (int)Settings.Player.carID);
+        GetComponent<NetworkView>().RPC("RPCRegisterPlayer", RPCMode.Server, Network.player, Settings.Player.name, (int)NetworkPlayerNoirState.notReady);
+        GetComponent<NetworkView>().RPC("RPCRegisterCarID", RPCMode.Server, Network.player, (int)Settings.Player.carID);
     }
 
     //Called on the server whenever a player is disconnected from the server.

@@ -32,7 +32,7 @@ public class MusicShader : MonoBehaviour {
 
 	void Update() {
         float[] spectrum = new float[numSamples];
-        audio.GetSpectrumData(spectrum, 0, FFTWindow.BlackmanHarris);
+        GetComponent<AudioSource>().GetSpectrumData(spectrum, 0, FFTWindow.BlackmanHarris);
 		//float[] spectrum = audio.GetOutputData(numSamples, 0); 
 		int i = 1;
 		while (i < numSamples+1) {

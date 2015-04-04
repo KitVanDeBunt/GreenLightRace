@@ -10,11 +10,11 @@ public class UVTest : MonoBehaviour{
 		for(i = 0; i < mesh.uv.Length;i++){
 			print ("uv:"+i+">"+mesh.uv[i]);
 		}
-		for(i = 0; i < mesh.uv1.Length;i++){
-			print ("uv1:"+i+">"+mesh.uv1[i]);
+		for(i = 0; i < mesh.uv2.Length;i++){
+			print ("uv1:"+i+">"+mesh.uv2[i]);
 		}
 		for(i = 0; i < mesh.uv2.Length;i++){
-			print ("uv1:"+i+">"+mesh.uv1[i]);
+			print ("uv1:"+i+">"+mesh.uv2[i]);
 		}
 	}
 }

@@ -30,9 +30,9 @@ public class CameraFollow : MonoBehaviour
 		posX = a.x;
 		posY = a.y;
 
-		if(this.rigidbody != null)
+		if(this.GetComponent<Rigidbody>() != null)
 		{
-			rigidbody.freezeRotation = true;
+			GetComponent<Rigidbody>().freezeRotation = true;
 		}
 	}
 

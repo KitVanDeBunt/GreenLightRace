@@ -56,7 +56,7 @@ public class ShowroomManager : MonoBehaviour
         cars[carSelected].gameObject.SetActive(true);
         cars[carSelected].transform.rotation = spawnRotations[carSelected];
         cars[carSelected].transform.position = spawnPositions[carSelected];
-        cars[carSelected].rigidbody.velocity = Vector3.zero;
+        cars[carSelected].GetComponent<Rigidbody>().velocity = Vector3.zero;
         onSelectNewCar(carSelected);
 
         return 0;

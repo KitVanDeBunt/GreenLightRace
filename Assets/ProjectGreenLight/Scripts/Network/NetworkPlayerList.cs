@@ -65,7 +65,7 @@ public class NetworkPlayerList
         if (Network.isClient)
 	    {
             Debug.Log(Network.GetLastPing(Network.connections[0]));
-            monoBehaviour_.networkView.RPC("RPCRecievePing", RPCMode.All, Network.player, Network.GetLastPing(Network.connections[0]));
+            monoBehaviour_.GetComponent<NetworkView>().RPC("RPCRecievePing", RPCMode.All, Network.player, Network.GetLastPing(Network.connections[0]));
 	    }
     }
 
@@ -76,13 +76,13 @@ public class NetworkPlayerList
 
     public void ToggleReady()
     {
-        monoBehaviour_.networkView.RPC("RPCToggleReady", RPCMode.Others, Network.player);
+        monoBehaviour_.GetComponent<NetworkView>().RPC("RPCToggleReady", RPCMode.Others, Network.player);
         RPCToggleReady(Network.player);
     }
 
     public void RegisterCarID(CarID carId)
     {
-        monoBehaviour_.networkView.RPC("RPCRegisterCarID", RPCMode.Others, (int)carId);
+        monoBehaviour_.GetComponent<NetworkView>().RPC("RPCRegisterCarID", RPCMode.Others, (int)carId);
         RPCRegisterCarID(Network.player, (int)carId);
     }
 
@@ -137,7 +137,7 @@ public class NetworkPlayerList
             if (Network.isServer)
             {
                 //register state client at other clients
-                monoBehaviour_.networkView.RPC("RPCSetPlayerState", RPCMode.Others, player, (int)state);
+                monoBehaviour_.GetComponent<NetworkView>().RPC("RPCSetPlayerState", RPCMode.Others, player, (int)state);
             }
             //call event to update ui
             EventManager.callOnNetEvent(Events.Net.NEW_PLAYER_LIST);
@@ -155,15 +155,15 @@ public class NetworkPlayerList
                 for (int i = 0; i < playerList_.Count; i++)
                 {
                     //register player list at new client
-                    monoBehaviour_.networkView.RPC("RPCRegisterPlayer", newPlayer, playerList_[i].netPlayer, playerList_[i].name, (int)playerList_[i].state);
+                    monoBehaviour_.GetComponent<NetworkView>().RPC("RPCRegisterPlayer", newPlayer, playerList_[i].netPlayer, playerList_[i].name, (int)playerList_[i].state);
                     if (playerList_[i].netPlayer != Network.player)
                     {
                         //register new client at playerlist exept server
-                        monoBehaviour_.networkView.RPC("RPCRegisterPlayer", playerList_[i].netPlayer, newPlayer, newPlayername, (int)state);
+                        monoBehaviour_.GetComponent<NetworkView>().RPC("RPCRegisterPlayer", playerList_[i].netPlayer, newPlayer, newPlayername, (int)state);
                     }
                 }
                 //register new client at new client
-                monoBehaviour_.networkView.RPC("RPCRegisterPlayer", newPlayer, newPlayer, newPlayername, (int)state);
+                monoBehaviour_.GetComponent<NetworkView>().RPC("RPCRegisterPlayer", newPlayer, newPlayer, newPlayername, (int)state);
             }
             //register player
             NetworkPlayerNoir newPlayerNoir = new NetworkPlayerNoir(newPlayername, (NetworkPlayerNoirState)state, newPlayer);
@@ -186,7 +186,7 @@ public class NetworkPlayerList
         if (Network.isServer)
         {
             //unregister at clients
-            monoBehaviour_.networkView.RPC("RPCUnregisterPlayer", RPCMode.Others, player);
+            monoBehaviour_.GetComponent<NetworkView>().RPC("RPCUnregisterPlayer", RPCMode.Others, player);
         }
         //
         EventManager.callOnNetEvent(Events.Net.NEW_PLAYER_LIST);

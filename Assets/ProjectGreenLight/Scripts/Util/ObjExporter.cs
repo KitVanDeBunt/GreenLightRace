@@ -10,7 +10,7 @@ public class ObjExporter {
 	
 	public static string MeshToString(MeshFilter mf, bool invertXAxis = false, bool useWorldMatrix = false) {
 		Mesh m = mf.sharedMesh;
-		Material[] mats = mf.renderer.sharedMaterials;
+		Material[] mats = mf.GetComponent<Renderer>().sharedMaterials;
 		
 		StringBuilder sb = new StringBuilder();
 		

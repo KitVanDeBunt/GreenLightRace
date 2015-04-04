@@ -49,13 +49,13 @@ public class CarControl2 : MonoBehaviour
 
 	void Start () 
 	{
-		rigidbody.centerOfMass = new Vector3(COM.localPosition.x * transform.localScale.x, COM.localPosition.y * transform.localScale.y, COM.localPosition.z * transform.localScale.z);
+		GetComponent<Rigidbody>().centerOfMass = new Vector3(COM.localPosition.x * transform.localScale.x, COM.localPosition.y * transform.localScale.y, COM.localPosition.z * transform.localScale.z);
 	}
 
 	void Update () 
 	{
-		speed_ = rigidbody.velocity.magnitude * 3.6f;
-		rigidbody.drag = rigidbody.velocity.magnitude / 100f;
+		speed_ = GetComponent<Rigidbody>().velocity.magnitude * 3.6f;
+		GetComponent<Rigidbody>().drag = GetComponent<Rigidbody>().velocity.magnitude / 100f;
 		EngineRPM = (Wheel_FL.rpm + Wheel_FR.rpm) / 2f * GearRatio[CurrentGear];
 		
 		ShiftGears();
