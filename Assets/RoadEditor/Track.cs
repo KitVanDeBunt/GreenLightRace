@@ -826,6 +826,34 @@ public class Track : MonoBehaviour {
         meshRendererWalls.sharedMaterial = trackSettings.TrackMaterialWalls;
         meshRendererBottom.sharedMaterial = trackSettings.TrackMaterialBottom;
 	}
+
+    public MeshFilter getCombimedMeshFilter() {
+        GameObject tempMeshFilterHolder = new GameObject("TempCombinedMeshFilterHolder");
+        MeshFilter tempMeshFilter = tempMeshFilterHolder.AddComponent<MeshFilter>();
+        MeshRenderer tempMeshRenderer = tempMeshFilterHolder.AddComponent<MeshRenderer>();
+        tempMeshFilter.mesh = new Mesh();
+
+        CombineInstance[] combine = new CombineInstance[3];
+        combine[0].mesh = walls.gameObject.GetComponent<MeshFilter>().sharedMesh;
+        combine[0].transform = Matrix4x4.identity;
+
+        combine[1].mesh = bottom.gameObject.GetComponent<MeshFilter>().sharedMesh;
+        combine[1].transform = Matrix4x4.identity;
+
+        combine[2].mesh = gameObject.GetComponent<MeshFilter>().sharedMesh;
+        combine[2].transform = Matrix4x4.identity;
+
+        tempMeshRenderer.materials = new Material[3];
+        tempMeshRenderer.materials[0] = bottom.gameObject.GetComponent<MeshRenderer>().sharedMaterial;
+        tempMeshRenderer.materials[1] = walls.gameObject.GetComponent<MeshRenderer>().sharedMaterial;
+        tempMeshRenderer.materials[2] = gameObject.GetComponent<MeshRenderer>().sharedMaterial;
+
+
+        tempMeshFilter.sharedMesh.CombineMeshes(combine);
+
+
+        return tempMeshFilter;
+    }
 }
 
 

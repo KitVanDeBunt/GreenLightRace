@@ -27,7 +27,9 @@ public class TrackEditor : Editor {
 		if (GUILayout.Button ("Export OBJ"+multiText)) {
 			for (int i = 0; i < myTargets.Length; i++) {
 				tempTrack = (Track)myTargets[i];
-				ObjExporter.MeshToFile (tempTrack.gameObject.GetComponent<MeshFilter> (), filePath, (tempTrack.getName + ".obj"),correctedXAxisExport, worldMatrix);
+                MeshFilter combineMeshFilter = tempTrack.getCombimedMeshFilter();
+                ObjExporter.MeshToFile(combineMeshFilter , filePath, (tempTrack.getName + ".obj"), correctedXAxisExport, worldMatrix);
+                DestroyImmediate(combineMeshFilter.gameObject);
 			}
 		}
 
