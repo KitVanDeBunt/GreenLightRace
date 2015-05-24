@@ -4,7 +4,7 @@ namespace Settings
     class Levels
     {
         public const string MENU = "menu";
-        public const string LEVEL_1 = "level_1";
+		public const string LEVEL_1 = "level_1u5";
     }
     class Net
     {

@@ -11,6 +11,9 @@ public class Node : MonoBehaviour
 	public float maxSpeed;
 	public float minDist;
 
+	public Node next;
+	public Node previous;
+
 	void Awake () 
 	{
 		InitPoints();

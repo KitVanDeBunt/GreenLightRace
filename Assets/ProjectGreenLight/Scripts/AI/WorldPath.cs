@@ -32,6 +32,24 @@ public class WorldPath : MonoBehaviour
         pathList.Add(newPathePoint);
     }
 
+	/// <summary>
+	/// Gets the closest point.
+	/// </summary>
+	/// <returns>The closest point.</returns>
+	/// <param name="from">point to check from.</param>
+	public Node GetClosestPoint(Vector3 from){
+		float closest = float.MaxValue;
+		Node closestPoint = pathList[0];
+		for (int i = 0; i < pathList.Count; i++) {
+			float distToPointInPath = Vector3.Distance (pathList[i].center.position,from);
+			if(closest > distToPointInPath){
+				closest = distToPointInPath;
+				closestPoint = pathList[i];
+			}
+		}
+		return closestPoint;
+	}
+
     //returns true if build
     public bool Rebuild()
     {
@@ -144,8 +162,20 @@ public class WorldPath : MonoBehaviour
             
             //newNodes.pointList[i].
         }
-        //
-
+        // update prefious next nodes
+		for (i = 0; i < pointList.Count; i++)
+		{
+			if(i == 0){ // first
+				pathList[i].next = pathList[i+1];
+				pathList[i].previous = pathList[pathList.Count-1];
+			}else if(i == (pathList.Count-1)){ //last
+				pathList[i].next = pathList[0];
+				pathList[i].previous = pathList[i-1];
+			}else{
+				pathList[i].next = pathList[i+1];
+				pathList[i].previous = pathList[i-1];
+			}
+		}
 
         return true;
     }

@@ -102,7 +102,7 @@ public class VehicleFollow : MonoBehaviour
         if (fixAngle && prevButtonRight)
         {
             //traget rotation
-            rotation = Quaternion.Lerp(rotation, target.rotation, 0.5f);
+            rotation = Quaternion.Lerp(rotation, target.rotation, 1.0f);
             //current rotation
             rotation = Quaternion.Lerp(myTransform.rotation, rotation, rotationDampening * Time.deltaTime);
         }

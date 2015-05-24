@@ -3,6 +3,15 @@ using System.Collections.Generic;
 
 public class PropPlacer : MonoBehaviour
 {
+	enum PlaysmentType{
+		relativeToCenter,
+		relativeToLeft,
+		RelativeToRight
+	}
+	[SerializeField]
+	private PlaysmentType propPlacementType;
+	[SerializeField]
+	private Vector3 offset;
     //public Node[] path;
     [HideInInspector]
     [SerializeField]
@@ -138,7 +147,12 @@ public class PropPlacer : MonoBehaviour
         {
             pathList[i].position = pointList[i];
             pathList[i].rotation = rotationList[i];
-            pathList[i].Translate(new Vector3(-(widthList[i] / 2), 0, 0), Space.Self);
+			if(propPlacementType == PlaysmentType.relativeToLeft){
+				pathList[i].Translate(new Vector3(-(widthList[i] / 2), 0, 0), Space.Self);
+			}else if(propPlacementType == PlaysmentType.RelativeToRight){
+				pathList[i].Translate(new Vector3((widthList[i] / 2), 0, 0), Space.Self);
+			}
+			pathList[i].Translate(offset,Space.Self);
             GameObject newProp = (GameObject)GameObject.Instantiate(prop, pathList[i].position, pathList[i].rotation);
             newProp.isStatic = true;
             newProp.name = "paal";
