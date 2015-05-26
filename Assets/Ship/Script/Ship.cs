@@ -19,7 +19,7 @@ public class Ship : MonoBehaviour {
 	[SerializeField]
 	private float lineHight = 5f;
 
-	private Rigidbody rigidbody;
+	private Rigidbody rigidB;
 	private float input = 0f;
 	private float steer = 0f;
 
@@ -35,8 +35,37 @@ public class Ship : MonoBehaviour {
 	private Transform rotatePointFront;
 	[SerializeField]
 	private float frontRotatePowerMult = 0.2f;
-
+	
 	private Vector3[] trustDirs;
+
+	[Tooltip("max speed in km/h")]
+	[SerializeField]
+	private float maxSpeed = 500f; 
+
+	//boosters
+	[SerializeField]
+	private ParticleSystem[] boosters;
+	[SerializeField]
+	private float boosterParticleMultiplyer = 2f;
+
+	private float boosterSpeed = 0f; 
+
+	private float deltaTimeForce;
+
+	// ui
+	[SerializeField]
+	private UnityEngine.UI.Text speedText;
+	void UpdateUI(){
+		string speedString = ((int)(rigidB.velocity.magnitude*3.6f)).ToString();
+		while (speedString.Length < 6) {
+			speedString = ("0"+speedString);
+		}
+		speedString+="km/h";
+		
+		//Debug.Log (speedString.Length);
+		speedText.text = speedString;
+	}
+
 
 	void OnDrawGizmos(){
 		Node pathPoint = path.GetClosestPoint (transform.position);
@@ -268,29 +297,61 @@ public class Ship : MonoBehaviour {
 	}
 
 	void Start () {
-		rigidbody = GetComponent<Rigidbody> ();
+		rigidB = GetComponent<Rigidbody> ();
 	}
 
 	void FixedUpdate (){
 		Node colsestPatPoint = path.GetClosestPoint (transform.position);
 
-		//force forwared
+		//// v3
+		Vector3 shipVelocityVector = (rigidB.mass * 50f * rigidB.velocity * -1) * ((rigidB.velocity.magnitude * 3.6f) / (16000f * 3.6f));
+		Vector3 ShipVelocityVectorNormalized = shipVelocityVector.normalized;
+		Vector3 drawShipDragVector = ShipVelocityVectorNormalized*10f;
+		Vector3 shipAngleVector = transform.rotation * Vector3.back;
+		Vector3 drawShipAngleVector = shipAngleVector*10f;
+
+		Debug.DrawRay (transform.position, drawShipAngleVector, Color.red);
+		Debug.DrawRay (transform.position, drawShipDragVector , Color.white);
+
+		float ShipVelocityAngleDiffrence = Vector3.Angle (shipAngleVector, shipVelocityVector);
+		float dragSteerPower1 = (ShipVelocityAngleDiffrence / 180f);
+		float dragSteerPower2 = Mathf.Clamp((ShipVelocityAngleDiffrence / 45f),0f,1f);
+
+		//dragSteerPower1 = 1f;		
+		//dragSteerPower2 = 0f;
+
+		//Debug.Log ("dragSteerPower1:"+dragSteerPower1+"\ndragSteerPower2:"+dragSteerPower2);
+		//float shipAngle = drawNorm*
+		//rigidB.AddForce (drag);
+
+		//force forwared / drag
+		Vector3 forceForwared = ((transform.rotation*(Vector3.forward * input * speed *speedMult)));
+		rigidB.AddForce ((forceForwared*deltaTimeForce));
+		//drag
+		Vector3 dragF = (rigidB.mass * 50f * ((rigidB.velocity*(1-dragSteerPower1))+(shipAngleVector*dragSteerPower2*rigidB.velocity.magnitude)) * -1) * (Mathf.Clamp (((rigidB.velocity.magnitude * 3.6f) / maxSpeed), 0.0f, 1.0f));
+		rigidB.AddForce ((dragF*deltaTimeForce));
+
+		/*
 		Vector3 forceForwared = (transform.rotation*(Vector3.forward * input * speed *speedMult));
-		rigidbody.AddForce (forceForwared);
+		float forceDrag = (1f - ((rigidB.velocity.magnitude * 3.6f) / (maxSpeed * 3.6f)));
+		rigidB.AddForce ((forceForwared*forceDrag));*/
 
 		//force down
 		Vector3 forceDown = colsestPatPoint.center.rotation*Vector3.down*downForce;
-		rigidbody.AddForce (forceDown);
+		rigidB.AddForce ((forceDown*deltaTimeForce));
 
 		//rotate
-		//rigidbody.AddRelativeTorque ((Vector3.up*steer*steerPower*rigidbody.velocity.magnitude));
-		rigidbody.AddForceAtPosition (transform.rotation*((Vector3.right*steer*(steerPowerBase+(steerPowerSec*rigidbody.velocity.magnitude)))),rotatePointFront.position);
+		//// v1
+		//rigidB.AddRelativeTorque ((Vector3.up*steer*steerPower*rigidB.velocity.magnitude));
+		//// v2
+		rigidB.AddForceAtPosition ((transform.rotation*((Vector3.right*steer*(steerPowerBase+(steerPowerSec*rigidB.velocity.magnitude))))*deltaTimeForce),rotatePointFront.position);
+		//
+		rigidB.AddForceAtPosition ((transform.rotation*((Vector3.right*steer*(frontRotatePowerMult*(steerPowerBase+(steerPowerSec*rigidB.velocity.magnitude)))))*deltaTimeForce),rotatePointBack.position);
 
-		rigidbody.AddForceAtPosition (transform.rotation*((Vector3.right*steer*(frontRotatePowerMult*(steerPowerBase+(steerPowerSec*rigidbody.velocity.magnitude))))),rotatePointBack.position);
 
 		CalcTrustersVectors ();
 		Trusters ();
-		//Debug.Log ("rigidbody.velocity.magnitude:  --"+rigidbody.velocity.magnitude);
+		//Debug.Log ("rigidB.velocity.magnitude:  --"+rigidB.velocity.magnitude);
 
 
 		input = 0f;
@@ -302,19 +363,35 @@ public class Ship : MonoBehaviour {
 			for (int i = 0; i < thrusters.Length; i++) {
 				float dist = Vector3.Distance (thrusters [i].transform.position, trustDirs [i]);
 				Vector3 vectDir = (thrusters [i].transform.position - trustDirs [i]);
-				Debug.Log("vectDir:"+vectDir);
+				//Debug.Log("vectDir:"+vectDir);
 				Debug.DrawRay(thrusters [i].transform.position,vectDir,Color.yellow);
 				thrusters [i].Direction = vectDir;
 
 				Vector3 thrusterdir = (thrusters [i].Force * thrusters [i].Direction);
 				//Debug.Log("thrusterdir:"+thrusterdir);
-				//rigidbody.AddForceAtPosition ((dist*thrusters[i].Force*vectDir),thrusters[i].transform.position);
-				rigidbody.AddForceAtPosition (thrusterdir, thrusters [i].transform.position);
+				//rigidB.AddForceAtPosition ((dist*thrusters[i].Force*vectDir),thrusters[i].transform.position);
+				rigidB.AddForceAtPosition ((thrusterdir*deltaTimeForce), thrusters [i].transform.position);
 			}
 		}
 	}
 
+	
+	void UpdateBoosters(){
+		if (input > 0 && boosterSpeed < 1f) {
+			boosterSpeed += input;
+			boosterSpeed += Time.deltaTime;
+		} else if(boosterSpeed > 0){
+			boosterSpeed -= Time.deltaTime;
+		}
+		foreach (var booster in boosters) {
+			booster.startSpeed = (25f+(100f*boosterSpeed)); 
+			booster.emissionRate = ((boosterSpeed*boosterParticleMultiplyer*10f)+20f);
+		}
+	}
+
 	void Update () {
+		deltaTimeForce = 80f * Time.deltaTime;
+		UpdateUI ();
 		if(Input.GetKey(KeyCode.W)){
 			input += Time.deltaTime;
 		}
@@ -327,5 +404,6 @@ public class Ship : MonoBehaviour {
 		if(Input.GetKey(KeyCode.A)){
 			steer -= Time.deltaTime;
 		}
+		UpdateBoosters();
 	}
 }

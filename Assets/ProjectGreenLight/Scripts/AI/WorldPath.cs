@@ -19,6 +19,8 @@ public class WorldPath : MonoBehaviour
     [SerializeField]
     private float bezierStepSize = 1;
     //private int pathLength;
+	[SerializeField]
+	private bool generateLabels;
 
     void Start()
     {
@@ -135,13 +137,15 @@ public class WorldPath : MonoBehaviour
             }
             pathList[i].transform.parent = holder.transform;
 #if UNITY_EDITOR
-            IconManager.SetIcon(pathList[i].gameObject, IconManager.LabelIcon.Purple);
+			if(generateLabels){
+            	IconManager.SetIcon(pathList[i].gameObject, IconManager.LabelIcon.Purple);
+			}
 #endif
         }
 
         //Debug.Log("pointList COUNT L:" + pointList.Count);
        
-        //update
+        //update nodes(path)
         for (i = 0; i < pointList.Count; i++)
         {
             pathList[i].transform.position = pointList[i];
@@ -157,6 +161,8 @@ public class WorldPath : MonoBehaviour
             pathList[i].maxLeft.Translate(new Vector3((widthList[i]/2), 0, 0), Space.Self);
 
             pathList[i].maxSpeed = 120F;
+
+			pathList[i].GenerateLabels = generateLabels;
 
            // pathList[i].maxLeft.position = widthList[i];
             

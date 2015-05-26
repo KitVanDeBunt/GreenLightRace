@@ -265,7 +265,7 @@ public class Track : MonoBehaviour {
 					pointsList.Remove(pointsList[i]);
 				}
 			}
-			Debug.Log("update track");
+			//Debug.Log("update track");
 			Draw ();
 		}
 	}

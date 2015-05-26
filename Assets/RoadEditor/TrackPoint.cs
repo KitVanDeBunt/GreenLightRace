@@ -55,33 +55,34 @@ public class TrackPoint : MonoBehaviour{
 	private void BindPointLoop(){
 		if (bindPoint != null) {
 			bindPointScript = bindPoint.GetComponent<TrackPoint>();
-
-			//check if update is needed
-			updatePoint = false;
-			if(transform.position!=checkPosition){
-				updatePoint = true;
-			}
-			if(!updatePoint){
-				if(transform.rotation!=checkRotation){
+			if(bindPointScript!=null){
+				//check if update is needed
+				updatePoint = false;
+				if(transform.position!=checkPosition){
 					updatePoint = true;
 				}
-			}
-			if(!updatePoint){
-				if(width!=checkWidth){
-					updatePoint = true;
+				if(!updatePoint){
+					if(transform.rotation!=checkRotation){
+						updatePoint = true;
+					}
 				}
-			}
+				if(!updatePoint){
+					if(width!=checkWidth){
+						updatePoint = true;
+					}
+				}
 
-            if (!updatePoint){
-                if (height != checkHeight)
-                {
-                    updatePoint = true;
-                }
-            }
-			//update points
-			if(updatePoint){
-				UpdateCheckPoint(this,true);
-				bindPointScript.UpdateCheckPoint(this,false);
+	            if (!updatePoint){
+	                if (height != checkHeight)
+	                {
+	                    updatePoint = true;
+	                }
+	            }
+				//update points
+				if(updatePoint){
+					UpdateCheckPoint(this,true);
+					bindPointScript.UpdateCheckPoint(this,false);
+				}
 			}
 		}
 	}

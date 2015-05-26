@@ -14,6 +14,17 @@ public class Node : MonoBehaviour
 	public Node next;
 	public Node previous;
 
+	[SerializeField]
+	[HideInInspector]
+	private bool generateLabels;
+
+	public bool GenerateLabels {
+		set {
+			generateLabels = value;
+			InitPoints();
+		}
+	}
+
 	void Awake () 
 	{
 		InitPoints();
@@ -37,22 +48,24 @@ public class Node : MonoBehaviour
 				point.transform.parent = transform;
 				point.transform.position = transform.position;
 				point.transform.rotation = transform.rotation;
-#if UNITY_EDITOR
-                if (name == "left")
-                {
-                    IconManager.SetIcon(point.gameObject, IconManager.Icon.DiamondYellow);
-                }
-                else if (name == "right")
-                {
-                    IconManager.SetIcon(point.gameObject, IconManager.Icon.DiamondOrange);
-                }
-                else if (name == "center")
-                {
-                    IconManager.SetIcon(point.gameObject, IconManager.LabelIcon.Yellow);
-                }
-#endif
 			}
 		}
+		#if UNITY_EDITOR
+		if(generateLabels){
+			if (name == "left")
+			{
+				IconManager.SetIcon(point.gameObject, IconManager.Icon.DiamondYellow);
+			}
+			else if (name == "right")
+			{
+				IconManager.SetIcon(point.gameObject, IconManager.Icon.DiamondOrange);
+			}
+			else if (name == "center")
+			{
+				IconManager.SetIcon(point.gameObject, IconManager.LabelIcon.Yellow);
+			}
+		}
+		#endif
 	}
 	
 	public bool checkDistance(Vector2 carPos)
