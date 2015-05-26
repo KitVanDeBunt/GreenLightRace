@@ -390,7 +390,7 @@ public class Ship : MonoBehaviour {
 	}
 
 	void Update () {
-		deltaTimeForce = 80f * Time.deltaTime;
+		deltaTimeForce = 80f * (1f/90f);
 		UpdateUI ();
 		if(Input.GetKey(KeyCode.W)){
 			input += Time.deltaTime;
