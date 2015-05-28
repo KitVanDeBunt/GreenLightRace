@@ -2,6 +2,7 @@
 using System.Collections;
 
 public class Ship : MonoBehaviour {
+
 	[SerializeField]
 	private float speed = 10.0f;
 	[SerializeField]
@@ -10,21 +11,20 @@ public class Ship : MonoBehaviour {
 	private float downForce = 2.0f;
 	[SerializeField]
 	private float steerPowerBase = 150000f;
+	[Tooltip("steer power added to total steer power based on velocity")]
 	[SerializeField]
 	private float steerPowerSec = 30000f;
 	[SerializeField]
 	private WorldPath path;
 	[SerializeField]
 	private float gizmoSize = 1f;
+	[Tooltip("ships distance to the ground")]
 	[SerializeField]
-	private float lineHight = 5f;
+	private float shipHeight = 5f;
 
 	private Rigidbody rigidB;
 	private float input = 0f;
 	private float steer = 0f;
-
-	[SerializeField]
-	private Transform test;
 
 	[SerializeField]
 	private ShipTruster[] thrusters;
@@ -41,20 +41,20 @@ public class Ship : MonoBehaviour {
 	[Tooltip("max speed in km/h")]
 	[SerializeField]
 	private float maxSpeed = 500f; 
+	
+	private float deltaTimeForce;
 
-	//boosters
+	// boosters
 	[SerializeField]
 	private ParticleSystem[] boosters;
 	[SerializeField]
 	private float boosterParticleMultiplyer = 2f;
-
 	private float boosterSpeed = 0f; 
-
-	private float deltaTimeForce;
 
 	// ui
 	[SerializeField]
 	private UnityEngine.UI.Text speedText;
+
 	void UpdateUI(){
 		string speedString = ((int)(rigidB.velocity.magnitude*3.6f)).ToString();
 		while (speedString.Length < 6) {
@@ -66,132 +66,18 @@ public class Ship : MonoBehaviour {
 		speedText.text = speedString;
 	}
 
-
-	void OnDrawGizmos(){
-		Node pathPoint = path.GetClosestPoint (transform.position);
-
-		//draw line up and down from closest path point
-		Gizmos.color = Color.blue;
-		Gizmos.DrawWireSphere (pathPoint.center.position, gizmoSize);
-
-		//draw line up from closest path point
-		Gizmos.color = Color.magenta;
-		Vector3 closestPoint = pathPoint.center.position;
-		Quaternion rot = pathPoint.center.rotation;
-		Vector3 closestPointUp = (closestPoint+ (rot*Vector3.up*5));
-		Gizmos.DrawLine(closestPoint,closestPointUp);
-		//draw line down from closest path point
-		Vector3 closestPointDown = (closestPoint+ (rot*Vector3.down*5));
-		Gizmos.DrawLine(closestPoint,closestPointDown);
-		//draw line left from closest path point
-		Vector3 closestPointLeft = (closestPoint+ (rot*Vector3.left*5));
-		Gizmos.DrawLine(closestPoint,closestPointLeft);
-		//draw line right from closest path point
-		Vector3 closestPointRight = (closestPoint+ (rot*Vector3.right*5));
-		Gizmos.DrawLine(closestPoint,closestPointRight);
-
-		//draw force forwared
-		Vector3 forceForwared = (transform.position+(transform.rotation*(Vector3.forward *5f)));
-		Gizmos.color = Color.green;
-		Gizmos.DrawLine(transform.position,forceForwared);
-
-		//draw force down
-		Vector3 forceDown = (transform.position+ (rot*Vector3.down* 5f));
-		Gizmos.color = Color.yellow;
-		Gizmos.DrawLine(transform.position,forceDown);
-
-		//flyght line
-		Vector3 thisLine = pathPoint.center.position;
-		Vector3 nextLinePos = pathPoint.next.center.position;
-		Vector3 previousLinePos = pathPoint.previous.center.position;
-
-		//draw flyght aim line
-		Gizmos.color = Color.white;
-		Gizmos.DrawLine(previousLinePos,thisLine);
-		Gizmos.DrawLine(thisLine,nextLinePos);
-		
-		thisLine = thisLine + (pathPoint.center.rotation * Vector3.up * lineHight);
-		nextLinePos = nextLinePos + (pathPoint.next.center.rotation * Vector3.up * lineHight);
-		previousLinePos = previousLinePos + (pathPoint.previous.center.rotation * Vector3.up * lineHight);
-
-		//draw flyght aim line 2
-		Gizmos.color = Color.white;
-		Gizmos.DrawLine(previousLinePos,thisLine);
-		Gizmos.DrawLine(thisLine,nextLinePos);
-
-
-		//estimate truster calc pos
-		Vector3 shipZDist = DrawVectors(thisLine,transform.position,rot,false);
-
-		//shipZDist = ((pathPoint.center.rotation*(transform.position-thisLine))+thisLine);
-		//Vector3 shipZLeft = ((pathPoint.center.rotation*(transform.position-thisLine+(Vector3.left*5f)))+thisLine);
-		//Vector3 shipZRight = ((pathPoint.center.rotation*(transform.position-thisLine+(Vector3.right*5f)))+thisLine);
-		//Vector3 shipZFornt = ((pathPoint.center.rotation*(transform.position-thisLine+(Vector3.forward*5f)))+thisLine);
-		//Vector3 shipZBack = ((pathPoint.center.rotation*(transform.position-thisLine+(Vector3.back*5f)))+thisLine);
-
-		//Gizmos.DrawSphere ((shipZDist), 2f);
-		//Gizmos.DrawLine(shipZLeft,shipZRight);
-		//Gizmos.DrawLine(shipZFornt,shipZBack);
-
-		////////////////////
-
-		//rot = Quaternion.Lerp( pathPoint.next.center.rotation , pathPoint.center.rotation,0.5f);
-
-		Quaternion rotOther;
-		float otherzdelta;
-		Vector3 otherLinePos;
-		if (shipZDist.z > 0) {
-			rotOther = pathPoint.next.center.rotation;
-			otherLinePos = nextLinePos;
-		} else {
-			rotOther = pathPoint.previous.center.rotation;
-			otherLinePos = previousLinePos;
-		}
-		Vector3 shipZDistOther = (Quaternion.Inverse( rotOther)*(transform.position-otherLinePos));
-		float zdeltaOther = shipZDistOther.z;
-		float zdeltaTotal =  Mathf.Abs(shipZDist.z)+Mathf.Abs( zdeltaOther);
-		float zLerp;
-
-		Vector3 finalLinePos;
-		Quaternion finalLineRot;
-		if (shipZDist.z > 0) {
-			zLerp = (shipZDist.z/zdeltaTotal);
-			finalLinePos =Vector3.Lerp(thisLine,nextLinePos,zLerp);
-			finalLineRot =Quaternion.Lerp(pathPoint.center.rotation,pathPoint.next.center.rotation,zLerp);
-		}else{
-			zLerp = (zdeltaOther/zdeltaTotal);
-			finalLinePos =Vector3.Lerp(previousLinePos,thisLine,zLerp);
-			finalLineRot =Quaternion.Lerp(pathPoint.previous.center.rotation,pathPoint.center.rotation,zLerp);
-		}
-		DrawVectors (finalLinePos,transform.position, finalLineRot,true);
-		Gizmos.color = Color.white;
-		Gizmos.DrawWireSphere (finalLinePos,3f);
-
-		//draw force points
-		trustDirs = new Vector3[4];
-		for (int i = 0; i < thrusters.Length; i++) {
-			Vector3 pointBall = GetDrawVectors(i, finalLinePos, thrusters[i].transform.position, finalLineRot,true);
-		}
-
-		//Debug.Log ("zLerp:"+zLerp+"\nzdelta:"+shipZDist.z+" - zdeltaOther:"+zdeltaOther);
-	}
-
 	void CalcTrustersVectors(){
 		Node pathPoint = path.GetClosestPoint (transform.position);
 		Quaternion rot = pathPoint.center.rotation;
 		
-		//move text object
-		test.position = pathPoint.center.position;
-		test.rotation = pathPoint.center.rotation;
-		
 		//flyght line
 		Vector3 thisLine = pathPoint.center.position;
 		Vector3 nextLinePos = pathPoint.next.center.position;
 		Vector3 previousLinePos = pathPoint.previous.center.position;
 		
-		thisLine = thisLine + (pathPoint.center.rotation * Vector3.up * lineHight);
-		nextLinePos = nextLinePos + (pathPoint.next.center.rotation * Vector3.up * lineHight);
-		previousLinePos = previousLinePos + (pathPoint.previous.center.rotation * Vector3.up * lineHight);
+		thisLine = thisLine + (pathPoint.center.rotation * Vector3.up * shipHeight);
+		nextLinePos = nextLinePos + (pathPoint.next.center.rotation * Vector3.up * shipHeight);
+		previousLinePos = previousLinePos + (pathPoint.previous.center.rotation * Vector3.up * shipHeight);
 
 		//estimate truster calc pos
 		Vector3 shipZDist = DrawVectors(thisLine,transform.position,rot,false);
@@ -230,37 +116,6 @@ public class Ship : MonoBehaviour {
 		}
 	}
 
-	Vector3 GetDrawVectors(int i,Vector3 fromPos, Vector3 toPos, Quaternion fromRotate, bool draw){
-		Vector3 vectors = (Quaternion.Inverse( fromRotate)*(toPos-fromPos));
-		
-		float xdelta = vectors.x;
-		float ydelta = vectors.y;
-		float zdelta = vectors.z;
-
-		Vector3 XdeltaVector = (fromRotate * new Vector3 (xdelta, 0, 0));
-		Vector3 YdeltaVector = (fromRotate * new Vector3 (0, ydelta, 0));
-		Vector3 ZdeltaVector = (fromRotate * new Vector3 (0, 0, zdelta));
-		
-		Vector3 deltaDrawPoint1 = fromPos;
-		Vector3 deltaDrawPoint2 = (fromPos + ZdeltaVector);
-		Vector3 deltaDrawPoint3 = (fromPos + ZdeltaVector + XdeltaVector);
-		Vector3 deltaDrawPoint4 = (fromPos + ZdeltaVector + XdeltaVector + YdeltaVector);
-		
-		if(!draw){
-			trustDirs[i] = deltaDrawPoint3;
-		}
-		//draw vector components
-		if (draw) {
-			Gizmos.color = Color.red;
-			Gizmos.DrawLine (deltaDrawPoint1, deltaDrawPoint2);
-			Gizmos.color = Color.blue;
-			Gizmos.DrawLine (deltaDrawPoint2, deltaDrawPoint3);
-			Gizmos.color = Color.cyan;
-			Gizmos.DrawLine (deltaDrawPoint3, deltaDrawPoint4);
-		}
-		return vectors;
-	}
-
 	Vector3 DrawVectors(Vector3 fromPos, Vector3 toPos, Quaternion fromRotate, bool draw){
 		Vector3 vectors = (Quaternion.Inverse( fromRotate)*(toPos-fromPos));
 		
@@ -289,17 +144,13 @@ public class Ship : MonoBehaviour {
 		return vectors;
 	}
 
-
-	float ShipTargetHeightPos(){
-		Node pathPoint = path.GetClosestPoint (transform.position);
-		//pathPoint.center.
-		return 0;
-	}
-
 	void Start () {
 		rigidB = GetComponent<Rigidbody> ();
 	}
 
+	/// <summary>
+	/// Main physics update loop
+	/// </summary>
 	void FixedUpdate (){
 		Node colsestPatPoint = path.GetClosestPoint (transform.position);
 
@@ -358,6 +209,9 @@ public class Ship : MonoBehaviour {
 		steer = 0f;
 	}
 
+	/// <summary>
+	/// apply force at the truster positions to kep the ship ballanced (should be called once per Physics Update)
+	/// </summary>
 	void Trusters(){
 		if (trustDirs != null) {
 			for (int i = 0; i < thrusters.Length; i++) {
@@ -375,7 +229,10 @@ public class Ship : MonoBehaviour {
 		}
 	}
 
-	
+	/// <summary>
+	/// Updates the boosters particle systems.
+	/// needs to be done after input
+	/// </summary>
 	void UpdateBoosters(){
 		if (input > 0 && boosterSpeed < 1f) {
 			boosterSpeed += input;
@@ -388,10 +245,14 @@ public class Ship : MonoBehaviour {
 			booster.emissionRate = ((boosterSpeed*boosterParticleMultiplyer*10f)+20f);
 		}
 	}
-
+	
 	void Update () {
+		//NOTE quick fix
 		deltaTimeForce = 80f * (1f/90f);
+
 		UpdateUI ();
+
+		//input
 		if(Input.GetKey(KeyCode.W)){
 			input += Time.deltaTime;
 		}
@@ -404,6 +265,157 @@ public class Ship : MonoBehaviour {
 		if(Input.GetKey(KeyCode.A)){
 			steer -= Time.deltaTime;
 		}
+		
 		UpdateBoosters();
+	}
+
+	// Note comment work in progress
+
+	/// <summary>
+	/// spits up and draws the seperate z y and z distances between two points rotated by a quaternion
+	/// needs to be called by OnDrawGizmos()
+	/// </summary>
+	/// <returns>the end point</returns>
+	/// <param name="i">The index.</param>
+	/// <param name="fromPos">From position.</param>
+	/// <param name="toPos">To position.</param>
+	/// <param name="fromRotate">From rotate.</param>
+	/// <param name="draw">If set to <c>true</c> draw.</param>
+	Vector3 GetDrawVectors(int i,Vector3 fromPos, Vector3 toPos, Quaternion fromRotate, bool draw){
+		Vector3 vector = (Quaternion.Inverse( fromRotate)*(toPos-fromPos));
+
+		Vector3 XdeltaVector = (fromRotate * new Vector3 (vector.x, 0, 0));
+		Vector3 YdeltaVector = (fromRotate * new Vector3 (0, vector.y, 0));
+		Vector3 ZdeltaVector = (fromRotate * new Vector3 (0, 0, vector.z));
+		
+		Vector3 deltaDrawPoint1 = fromPos;
+		Vector3 deltaDrawPoint2 = (fromPos + ZdeltaVector);
+		Vector3 deltaDrawPoint3 = (fromPos + ZdeltaVector + XdeltaVector);
+		Vector3 deltaDrawPoint4 = (fromPos + ZdeltaVector + XdeltaVector + YdeltaVector);
+		
+		if(!draw){
+			trustDirs[i] = deltaDrawPoint3;
+		}
+		//draw vector components
+		if (draw) {
+			Gizmos.color = Color.red;
+			Gizmos.DrawLine (deltaDrawPoint1, deltaDrawPoint2);
+			Gizmos.color = Color.blue;
+			Gizmos.DrawLine (deltaDrawPoint2, deltaDrawPoint3);
+			Gizmos.color = Color.cyan;
+			Gizmos.DrawLine (deltaDrawPoint3, deltaDrawPoint4);
+		}
+		return vector;
+	}
+	
+	/// <summary>
+	/// visualizes ship mechanics calculations
+	/// </summary>
+	void OnDrawGizmos(){
+		Node pathPoint = path.GetClosestPoint (transform.position);
+		
+		//draw line up and down from closest path point
+		Gizmos.color = Color.magenta;
+		Gizmos.DrawSphere (pathPoint.center.position, gizmoSize);
+		
+		//draw line up from closest path point
+		Gizmos.color = Color.magenta;
+		Vector3 closestPoint = pathPoint.center.position;
+		Quaternion rot = pathPoint.center.rotation;
+		Vector3 closestPointUp = (closestPoint+ (rot*Vector3.up*5));
+		Gizmos.DrawLine(closestPoint,closestPointUp);
+		//draw line down from closest path point
+		Vector3 closestPointDown = (closestPoint+ (rot*Vector3.down*5));
+		Gizmos.DrawLine(closestPoint,closestPointDown);
+		//draw line left from closest path point
+		Vector3 closestPointLeft = (closestPoint+ (rot*Vector3.left*5));
+		Gizmos.DrawLine(closestPoint,closestPointLeft);
+		//draw line right from closest path point
+		Vector3 closestPointRight = (closestPoint+ (rot*Vector3.right*5));
+		Gizmos.DrawLine(closestPoint,closestPointRight);
+		
+		//draw force forwared
+		Vector3 forceForwared = (transform.position+(transform.rotation*(Vector3.forward *5f)));
+		Gizmos.color = Color.green;
+		Gizmos.DrawLine(transform.position,forceForwared);
+		
+		//draw force down
+		Vector3 forceDown = (transform.position+ (rot*Vector3.down* 5f));
+		Gizmos.color = Color.yellow;
+		Gizmos.DrawLine(transform.position,forceDown);
+		
+		//flyght line
+		Vector3 thisLine = pathPoint.center.position;
+		Vector3 nextLinePos = pathPoint.next.center.position;
+		Vector3 previousLinePos = pathPoint.previous.center.position;
+		
+		//draw flyght aim line
+		Gizmos.color = Color.white;
+		Gizmos.DrawLine(previousLinePos,thisLine);
+		Gizmos.DrawLine(thisLine,nextLinePos);
+		
+		thisLine = thisLine + (pathPoint.center.rotation * Vector3.up * shipHeight);
+		nextLinePos = nextLinePos + (pathPoint.next.center.rotation * Vector3.up * shipHeight);
+		previousLinePos = previousLinePos + (pathPoint.previous.center.rotation * Vector3.up * shipHeight);
+		
+		//draw flyght aim line 2
+		Gizmos.color = Color.white;
+		Gizmos.DrawLine(previousLinePos,thisLine);
+		Gizmos.DrawLine(thisLine,nextLinePos);
+		
+		
+		//estimate truster calc pos
+		Vector3 shipZDist = DrawVectors(thisLine,transform.position,rot,false);
+		
+		//shipZDist = ((pathPoint.center.rotation*(transform.position-thisLine))+thisLine);
+		//Vector3 shipZLeft = ((pathPoint.center.rotation*(transform.position-thisLine+(Vector3.left*5f)))+thisLine);
+		//Vector3 shipZRight = ((pathPoint.center.rotation*(transform.position-thisLine+(Vector3.right*5f)))+thisLine);
+		//Vector3 shipZFornt = ((pathPoint.center.rotation*(transform.position-thisLine+(Vector3.forward*5f)))+thisLine);
+		//Vector3 shipZBack = ((pathPoint.center.rotation*(transform.position-thisLine+(Vector3.back*5f)))+thisLine);
+		
+		//Gizmos.DrawSphere ((shipZDist), 2f);
+		//Gizmos.DrawLine(shipZLeft,shipZRight);
+		//Gizmos.DrawLine(shipZFornt,shipZBack);
+		
+		////////////////////
+		
+		//rot = Quaternion.Lerp( pathPoint.next.center.rotation , pathPoint.center.rotation,0.5f);
+		
+		Quaternion rotOther;
+		float otherzdelta;
+		Vector3 otherLinePos;
+		if (shipZDist.z > 0) {
+			rotOther = pathPoint.next.center.rotation;
+			otherLinePos = nextLinePos;
+		} else {
+			rotOther = pathPoint.previous.center.rotation;
+			otherLinePos = previousLinePos;
+		}
+		Vector3 shipZDistOther = (Quaternion.Inverse( rotOther)*(transform.position-otherLinePos));
+		float zdeltaOther = shipZDistOther.z;
+		float zdeltaTotal =  Mathf.Abs(shipZDist.z)+Mathf.Abs( zdeltaOther);
+		float zLerp;
+		
+		Vector3 finalLinePos;
+		Quaternion finalLineRot;
+		if (shipZDist.z > 0) {
+			zLerp = (shipZDist.z/zdeltaTotal);
+			finalLinePos =Vector3.Lerp(thisLine,nextLinePos,zLerp);
+			finalLineRot =Quaternion.Lerp(pathPoint.center.rotation,pathPoint.next.center.rotation,zLerp);
+		}else{
+			zLerp = (zdeltaOther/zdeltaTotal);
+			finalLinePos =Vector3.Lerp(previousLinePos,thisLine,zLerp);
+			finalLineRot =Quaternion.Lerp(pathPoint.previous.center.rotation,pathPoint.center.rotation,zLerp);
+		}
+		DrawVectors (finalLinePos,transform.position, finalLineRot,true);
+		Gizmos.color = Color.white;
+		Gizmos.DrawWireSphere (finalLinePos,3f);
+		
+		//draw force points
+		trustDirs = new Vector3[4];
+		for (int i = 0; i < thrusters.Length; i++) {
+			Vector3 pointBall = GetDrawVectors(i, finalLinePos, thrusters[i].transform.position, finalLineRot,true);
+		}
+		//Debug.Log ("zLerp:"+zLerp+"\nzdelta:"+shipZDist.z+" - zdeltaOther:"+zdeltaOther);
 	}
 }

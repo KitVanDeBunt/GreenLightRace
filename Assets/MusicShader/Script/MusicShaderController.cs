@@ -21,36 +21,41 @@ public class MusicShaderController : MonoBehaviour
 	private int current = 0;
 	
 	private bool manualControle;
-
+	private bool showController;
 	
 	void OnGUI(){
-		if(GUI.Button(new Rect(260,10,180,30),"Full Screen")){
-			CameraUtils.ToggleFullscreen();
+		showController = GUI.Toggle (new Rect (10, 10, 180, 30),showController, "Show Music Shader Controller");
+
+		if (GUI.Button (new Rect (260, 10, 180, 30), "Full Screen")) {
+			CameraUtils.ToggleFullscreen ();
 		}
 
-		float checkLightI = lightI;
-		float checkRed = mColorR;
-		float checkGreen = mColorG;
-		float checkBlue = mColorB;
+		if (showController) {
+			float checkLightI = lightI;
+			float checkRed = mColorR;
+			float checkGreen = mColorG;
+			float checkBlue = mColorB;
 		
-		lightI = GUI.HorizontalSlider(new Rect(10,10,100,10),lightI,0.0f,1.0f);
-		mColorR = GUI.HorizontalSlider(new Rect(10,30,100,10),mColorR,0.0f,1f);
-		mColorG = GUI.HorizontalSlider(new Rect(10,40,100,10),mColorG,0.0f,1f);
-		mColorB = GUI.HorizontalSlider(new Rect(10,50,100,10),mColorB,0.0f,1f);
+			lightI = GUI.HorizontalSlider (new Rect (10, 60, 100, 10), lightI, 0.0f, 1.0f);
+			mColorR = GUI.HorizontalSlider (new Rect (10, 80, 100, 10), mColorR, 0.0f, 1f);
+			mColorG = GUI.HorizontalSlider (new Rect (10, 90, 100, 10), mColorG, 0.0f, 1f);
+			mColorB = GUI.HorizontalSlider (new Rect (10, 100, 100, 10), mColorB, 0.0f, 1f);
 		
-		if(lightI!=checkLightI||mColorR!=checkRed||mColorG!=checkGreen||mColorB!=checkBlue){
-			manualControle = true;
-		}
-		if(manualControle){
-			if(GUI.Button(new Rect(10,70,180,30),"Auto Color Change(Press T)")){
-				manualControle = false;
-				oldGameTheme = new GameTheme(new Color(mColorR,mColorG,mColorB),lightI);
-				currentGameTheme = oldGameTheme;
-				StartCoroutine(ChangeTheme());
+			if (lightI != checkLightI || mColorR != checkRed || mColorG != checkGreen || mColorB != checkBlue) {
+				manualControle = true;
 			}
-		}else{
-			GUI.TextField(new Rect(120,20,130,30),"<-Manual Controle");
+			if (manualControle) {
+				if (GUI.Button (new Rect (120, 60, 180, 30), "Auto Color Change(Press T)")) {
+					manualControle = false;
+					oldGameTheme = new GameTheme (new Color (mColorR, mColorG, mColorB), lightI);
+					currentGameTheme = oldGameTheme;
+					StartCoroutine (ChangeTheme ());
+				}
+			} else {
+				GUI.TextField (new Rect (120, 60, 130, 30), "<-Manual Controle");
+			}
 		}
+
 	}
 
 	void Start(){
