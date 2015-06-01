@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿#if !UNITY_WEBGL
+using System.Collections.Generic;
 using UnityEngine;
 
 public class NetworkPlayerList
@@ -192,3 +193,4 @@ public class NetworkPlayerList
         EventManager.callOnNetEvent(Events.Net.NEW_PLAYER_LIST);
     }
 }
+#endif

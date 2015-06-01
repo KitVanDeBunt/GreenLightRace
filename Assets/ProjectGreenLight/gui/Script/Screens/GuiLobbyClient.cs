@@ -1,11 +1,13 @@
-﻿using UnityEngine;
+﻿#if !UNITY_WEBGL
+using UnityEngine;
 using System.Collections.Generic;
 using UnityEngine.UI;
 
 public class GuiLobbyClient : GuiLobbyBase
 {
-    public override GuiScreenId GetGuiId()
-    {
-        return GuiScreenId.LobbyClient;
-    }
+	public override GuiScreenId GetGuiId ()
+	{
+		return GuiScreenId.LobbyClient;
+	}
 }
+#endif

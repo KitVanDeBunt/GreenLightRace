@@ -1,8 +1,17 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+/// <summary>
+/// Ship that hovers above the points of a WorldPath
+/// </summary>
 public class Ship : MonoBehaviour {
+	
+	[SerializeField]
+	private WorldPath path;
 
+
+	[SerializeField]
+	private float friction;
 	[SerializeField]
 	private float speed = 10.0f;
 	[SerializeField]
@@ -14,8 +23,6 @@ public class Ship : MonoBehaviour {
 	[Tooltip("steer power added to total steer power based on velocity")]
 	[SerializeField]
 	private float steerPowerSec = 30000f;
-	[SerializeField]
-	private WorldPath path;
 	[SerializeField]
 	private float gizmoSize = 1f;
 	[Tooltip("ships distance to the ground")]
@@ -245,6 +252,11 @@ public class Ship : MonoBehaviour {
 			booster.emissionRate = ((boosterSpeed*boosterParticleMultiplyer*10f)+20f);
 		}
 	}
+
+	void OnCollisionStay(){
+		// TODO wall friction
+		//Debug.Log (Time.deltaTime);//friction
+	}
 	
 	void Update () {
 		//NOTE quick fix
@@ -252,18 +264,48 @@ public class Ship : MonoBehaviour {
 
 		UpdateUI ();
 
+		//mouse
+		float mouseInputX = 0;
+		if(Input.GetMouseButton(0)){
+			/*if(Input.mousePosition.x<(Screen.width/3)){
+				mouseInputX = -1;
+			}else if(Input.mousePosition.x>((Screen.width/3)*3)){
+				mouseInputX = 1;
+			}*/
+			mouseInputX = (((Input.mousePosition.x/Screen.width)-0.5f)*2f);
+	   	}
+		float mouseInputY = 0;
+		if(Input.GetMouseButton(0)){
+			/*if(Input.mousePosition.y>((Screen.height/3)*3)){
+				mouseInputY = 1;
+			}else{
+				mouseInputY = -1;
+			}
+			*/
+			mouseInputY = ((Mathf.Min(1f,(1f-(Input.mousePosition.y/Screen.height))*4f)-0.5f)*2f);
+			Debug.Log(mouseInputY);
+		}
+
 		//input
-		if(Input.GetKey(KeyCode.W)){
-			input += Time.deltaTime;
+		if (mouseInputY == 0) {
+			if (Input.GetKey (KeyCode.W) || mouseInputY == -1) {
+				input += Time.deltaTime;
+			}
+			if (Input.GetKey (KeyCode.S) || mouseInputY == 1) {
+				input -= (Time.deltaTime / 4);
+			}
+		} else {
+			input += (mouseInputY*Time.deltaTime);
 		}
-		if(Input.GetKey(KeyCode.S)){
-			input -= Time.deltaTime;
-		}
-		if(Input.GetKey(KeyCode.D)){
-			steer += Time.deltaTime;
-		}
-		if(Input.GetKey(KeyCode.A)){
-			steer -= Time.deltaTime;
+		if (mouseInputX == 0) {
+			if (Input.GetKey (KeyCode.D)) {
+				steer += Time.deltaTime;
+			}
+			if (Input.GetKey (KeyCode.A)) {
+				steer -= Time.deltaTime;
+			}
+		} else {
+			steer += (mouseInputX*Time.deltaTime);
 		}
 		
 		UpdateBoosters();

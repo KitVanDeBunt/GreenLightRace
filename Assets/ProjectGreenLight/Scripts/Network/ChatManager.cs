@@ -1,4 +1,4 @@
-﻿
+﻿#if !UNITY_WEBGL
 namespace Noir.Network
 {
     public class ChatManager
@@ -41,3 +41,4 @@ namespace Noir.Network
         }
     }
 }
+#endif

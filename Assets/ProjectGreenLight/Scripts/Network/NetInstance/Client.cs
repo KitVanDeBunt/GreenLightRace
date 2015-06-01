@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿#if !UNITY_WEBGL
+using UnityEngine;
 
 class Client : NetInstance
 {
@@ -18,3 +19,4 @@ class Client : NetInstance
         base.Close();
     }
 }
+#endif

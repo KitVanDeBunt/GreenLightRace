@@ -2,7 +2,9 @@
 Properties {
 	_Color ("Main Color", Color) = (1,1,1,1)
 	_Shininess ("Shininess", Range (0.01, 50)) = 0.078125
+	_MusicEffect ("MusicEffect", Range (0, 1)) = 1
 	_MColor ("Music Color", Color) = (1,1,1,1)
+	_ECollor ("Emission Color", Color) = (0,0,0,1)
 	
 	//static texture
 	_MainTex ("Base (RGB) Trans (A)", 2D) = "white" {}
@@ -60,6 +62,8 @@ sampler2D _MusicData;
 fixed4 _Color;
 fixed4 _MColor;
 half _Shininess;
+half _MusicEffect;
+fixed4 _ECollor;
 
 struct Input {
 	float2 uv_MainTex;
@@ -92,7 +96,7 @@ void surf (Input IN, inout CostumSurfaceOutput o) {
 	
 	o.Albedo = tOut;
 	o.Normal = UnpackNormal(tex2D(_BumpMap, IN.uv_BumpMap));
-	o.Emission = saturate((musicColor*_MColor)+tex2D(_Illum, IN.uv_Illum).rgb);
+	o.Emission = saturate((musicColor*_MColor*_MusicEffect)+tex2D(_Illum, IN.uv_Illum).rgb)+_ECollor;
 	o.Specular = _Shininess;
 	o.GlossColor = tex2D(_SpecMap, IN.uv_SpecMap).rgb;
 	o.Alpha = _Color.a;

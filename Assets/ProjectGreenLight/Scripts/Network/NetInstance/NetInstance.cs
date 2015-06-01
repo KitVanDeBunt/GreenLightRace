@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿#if !UNITY_WEBGL
+using UnityEngine;
 
 public abstract class NetInstance
 {
@@ -30,3 +31,4 @@ public abstract class NetInstance
         playerList.Loop();
     }
 }
+#endif
