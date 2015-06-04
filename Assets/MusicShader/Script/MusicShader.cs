@@ -16,6 +16,8 @@ public class MaterialHolder{
 	[HideInInspector]
 	[System.NonSerialized]
 	public float[] spactrumDataDelay;
+    public Texture2D dataTexture;
+    public FilterMode filterMode;
 }
 
 public class MusicShader : MonoBehaviour {
@@ -23,23 +25,14 @@ public class MusicShader : MonoBehaviour {
 	//shader materials
 	public MaterialHolder[] musicMaterials;
 	
-	private Texture2D tex;
-	private Texture2D tex2;
-	
 	int numSamples = 256;
 
 	void Start(){
-		tex = new Texture2D (numSamples, 1, TextureFormat.RGBA32, false);
-		tex.filterMode = FilterMode.Point;
-		tex2 = new Texture2D (numSamples, 1, TextureFormat.RGBA32, false);
-		tex2.filterMode = FilterMode.Point;
-
 		for(int j =0;j<musicMaterials.Length;j++){
-			if(musicMaterials[j].materialsType == MusicMaterialType.musicV4){
-				musicMaterials[j].material.SetTexture ("_MusicData", tex);
-			}else{
-				musicMaterials[j].material.SetTexture ("_MusicData", tex2);
-			}
+            musicMaterials[j].dataTexture = new Texture2D(numSamples, 1, TextureFormat.RGBA32, false);
+            musicMaterials[j].dataTexture.filterMode = musicMaterials[j].filterMode;
+            musicMaterials[j].material.SetTexture("_MusicData", musicMaterials[j].dataTexture);
+
 			musicMaterials[j].spactrumDataDelay = new float[numSamples];
 		}
 	}
@@ -73,15 +66,13 @@ public class MusicShader : MonoBehaviour {
 				//tex.SetPixel (i - 1 ,1, new Color( (spectrum[i - 1]*255.0f*multiplyer), 0, 0,0));
 
 				if(musicMaterials[j].materialsType == MusicMaterialType.musicV4){
-					tex.SetPixel (i - 1 ,1, new Color( (musicMaterials[j].spactrumDataDelay[i-1]*255.0f), 0, 0,0));
+                    musicMaterials[j].dataTexture.SetPixel(i - 1, 1, new Color((musicMaterials[j].spactrumDataDelay[i - 1] * 255.0f), 0, 0, 0));
 				}else{
-					ShaderUtil.WriteFloatToTexturePixel( musicMaterials[j].spactrumDataDelay[i-1],ref tex2,i-1,1);
+                    ShaderUtil.WriteFloatToTexturePixel(musicMaterials[j].spactrumDataDelay[i - 1], ref musicMaterials[j].dataTexture, i - 1, 1);
 				}
-
+                musicMaterials[j].dataTexture.Apply();
 				i++;
 			}
 		}
-		tex.Apply ();
-		tex2.Apply ();
 	}
 }
