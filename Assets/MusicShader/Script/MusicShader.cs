@@ -44,13 +44,12 @@ public class MusicShader : MonoBehaviour {
         GetComponent<AudioSource>().GetSpectrumData(spectrum, 0, FFTWindow.BlackmanHarris);
 		
 		for(int j =0;j<musicMaterials.Length;j++){
-			//float[] spectrum = audio.GetOutputData(numSamples, 0); 
 			int i = 1;
 			while (i < numSamples+1) {
 				float newData =  (spectrum[i - 1]*1.0f*musicMaterials[j].multiplyer);
 
 
-				//spactrumDataDelay[i-1] = newData;
+				// apply delay 
 				if(newData>musicMaterials[j].spactrumDataDelay[i-1]){
 					musicMaterials[j].spactrumDataDelay[i-1] += (musicMaterials[j].delay*Time.deltaTime);
 					if(musicMaterials[j].spactrumDataDelay[i-1] > newData){
@@ -63,10 +62,7 @@ public class MusicShader : MonoBehaviour {
 					}
 				}
 				
-				//tex.SetPixel (i + 1, 1, new Color(spectrum[i - 1], 0, 0,1));
-				//tex.SetPixel (i - 1 ,1, new Color( spactrumDataDelay[i-1], 0, 0,0));
-				//tex.SetPixel (i - 1 ,1, new Color( (spectrum[i - 1]*255.0f*multiplyer), 0, 0,0));
-
+				// set texture pixes
                 if (musicMaterials[j].musicMaterialsType == MusicMaterialType.musicV4) {
                     musicMaterials[j].dataTexture.SetPixel(i - 1, 1, new Color((musicMaterials[j].spactrumDataDelay[i - 1] * 255.0f), 0, 0, 0));
 				}else{
@@ -74,6 +70,7 @@ public class MusicShader : MonoBehaviour {
 				}
 				i++;
 			}
+            // update texture pixels
 			musicMaterials[j].dataTexture.Apply();
 		}
 	}
