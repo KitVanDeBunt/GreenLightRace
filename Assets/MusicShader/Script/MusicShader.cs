@@ -70,9 +70,9 @@ public class MusicShader : MonoBehaviour {
 				}else{
                     ShaderUtil.WriteFloatToTexturePixel(musicMaterials[j].spactrumDataDelay[i - 1], ref musicMaterials[j].dataTexture, i - 1, 1);
 				}
-                musicMaterials[j].dataTexture.Apply();
 				i++;
 			}
+			musicMaterials[j].dataTexture.Apply();
 		}
 	}
 }
